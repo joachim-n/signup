@@ -124,7 +124,7 @@ function signup_schema() {
         'default' => 0,
       ),
       'form_data' => array(
-        'description' => t('Serialized string of additional signup form values.  See theme_signup_user_form() from theme/signup.theme for more information.'),
+        'description' => t('Serialized string of additional signup form values.  See hook_signup_form_info() for more information.'),
         'type' => 'text',
         'size' => 'big',
         'not null' => TRUE,
