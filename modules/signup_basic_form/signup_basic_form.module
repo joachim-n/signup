@@ -35,8 +35,38 @@ function signup_basic_form_signup_form_info() {
     'basic' => array(
       'label' => 'Basic form',
       'description' => 'Collects name and phone number.',
-      'form_callback' => 'signup_basic_form_form',
+      'callback' => 'signup_basic_form_form',
     ),  
   );
 }
 
+
+function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
+  global $user;
+  $form = array();
+
+  // TODO??????
+  // If this function is providing any extra fields at all, the following
+  // line is required for form form to work -- DO NOT EDIT OR REMOVE.
+  $form['signup_form_data']['#tree'] = TRUE;
+
+  $form['signup_form_data']['Name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#size' => 40, '#maxlength' => 64,
+    '#required' => TRUE,
+  );
+  $form['signup_form_data']['Phone'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone'),
+    '#size' => 40, '#maxlength' => 64,
+  );
+
+  // If the user is logged in, fill in their name by default,
+  // except in the special case where the admin user is adding other users.
+  if ($user->uid && $signup_type != 'admin') {
+    $form['signup_form_data']['Name']['#default_value'] = $user->name;
+  }
+
+  return $form;
+}

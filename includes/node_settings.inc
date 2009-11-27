@@ -49,7 +49,6 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_form = $result->form;
   }
   
-  //dsm($node->signup_form);
   $signup_forms = module_invoke_all('signup_form_info');
   $options['none'] = 'No form';
   foreach ($signup_forms as $id => $signup_form_data) {
