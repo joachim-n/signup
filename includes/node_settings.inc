@@ -189,7 +189,6 @@ function signup_node_settings_form_submit($form, &$form_state) {
   // current node, not nid 0...
   $node = $form['#node'];
   $values[] = $node->nid;
-  dsm($values);
   db_query("UPDATE {signup} SET form = '%s', forwarding_email = '%s', send_confirmation = %d, confirmation_email = '%s', close_signup_limit = %d, send_reminder = %d, reminder_days_before = %d, reminder_email = '%s' WHERE nid = %d", $values);
 
   // See if the limit changed, and if so, take any necessary action.
