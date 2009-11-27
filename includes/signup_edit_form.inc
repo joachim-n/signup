@@ -85,23 +85,29 @@ function signup_edit_form($form_state, $signup, $type) {
     );
   }
 
-  // Build the themed signup form for this site and include that.
-  $site_form = theme('signup_user_form', $node);
+  // Build the extra signup form for this site and include that.
+  if ($node->signup_form != 'none') {
+    $signup_form_data = module_invoke_all('signup_form_info');
+    if (isset($signup_form_data[$node->signup_form])) {
+      $callback = $signup_form_data[$node->signup_form]['callback'];
+      $custom_form = $callback($form_state, $node, $signup_type);
+    }
+  }
   $form_data = unserialize($signup->form_data);
 
   // This is sort of a hack, but we don't support nested arrays for the custom
   // signup form anyway, so it works for now.  Obviously all this will change
   // with signup_fields and friends, but for now it works.
   foreach ($form_data as $key => $value) {
-    if (!empty($site_form['signup_form_data'][$key])) {
-      $site_form['signup_form_data'][$key]['#default_value'] = $value;
+    if (!empty($custom_form['signup_form_data'][$key])) {
+      $custom_form['signup_form_data'][$key]['#default_value'] = $value;
       if (!$can_edit) {
         // If they can't edit, mark all the fields as disabled.
-        $site_form['signup_form_data'][$key]['#disabled'] = TRUE;
+        $custom_form['signup_form_data'][$key]['#disabled'] = TRUE;
       }
     }
   }
-  $form['elements'] += $site_form;
+  $form['elements'] += $custom_form;
 
   // Add the appropriate buttons based on permissions.
   if ($can_edit) {
