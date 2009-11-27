@@ -1,0 +1,80 @@
+? .DS_Store
+? 644808.signup.cleaner-loading-to-node.patch
+? contrib/.DS_Store
+? contrib/signup_conflicts/.DS_Store
+? contrib/signup_ecommerce/.DS_Store
+? includes/.DS_Store
+? js/.DS_Store
+? modules/.DS_Store
+? modules/signup_basic_form
+? modules/signup_confirm_email/.DS_Store
+? modules/signup_confirm_email/translations/.DS_Store
+? panels/.DS_Store
+? panels/content_types/.DS_Store
+? po/.DS_Store
+? theme/.DS_Store
+? translations/.DS_Store
+? views/.DS_Store
+? views/default_views/.DS_Store
+? views/handlers/.DS_Store
+? views/plugins/.DS_Store
+Index: signup.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/signup/signup.module,v
+retrieving revision 1.242
+diff -u -p -r1.242 signup.module
+--- signup.module	8 Oct 2009 00:01:24 -0000	1.242
++++ signup.module	27 Nov 2009 16:20:53 -0000
+@@ -751,19 +751,16 @@ function signup_nodeapi(&$node, $op, $te
+       // Check for a signup for this node.
+       // If it's a new node, load the defaults.
+       $result = db_query("SELECT * FROM {signup} WHERE nid = %d", ($node->nid ? $node->nid : 0));
+-      $signup = db_fetch_object($result);
++      $signup = db_fetch_array($result);
+       // Load signup data for both new nodes w/ enabled node types,
+       // and any existing nodes that are already signup enabled.
+       if ((!$node->nid && variable_get('signup_node_default_state_'. $node->type, 'disabled') == 'enabled_on') || ($node->nid && !empty($signup))) {
+         $node->signup = 1;
+-        $node->signup_forwarding_email = $signup->forwarding_email;
+-        $node->signup_send_confirmation = $signup->send_confirmation;
+-        $node->signup_confirmation_email = $signup->confirmation_email;
+-        $node->signup_send_reminder  = $signup->send_reminder ;
+-        $node->signup_reminder_days_before = $signup->reminder_days_before;
+-        $node->signup_reminder_email = $signup->reminder_email;
+-        $node->signup_close_signup_limit = $signup->close_signup_limit;
+-        $node->signup_status = $signup->status;
++        // Transfer every item from the {signup} row to the $node object as a prefixed property, bar the nid.
++        unset($signup['nid']);
++        foreach ($signup as $key => $signup_data) {
++          $node->{"signup_$key"} = $signup_data;
++        }
+         if ($node->nid) {
+           $node->signup_total = db_result(db_query("SELECT COUNT(*) FROM {signup_log} WHERE nid = %d", $node->nid));
+           $node->signup_effective_total = db_result(db_query("SELECT SUM(count_towards_limit) FROM {signup_log} WHERE nid = %d", $node->nid));
+Index: includes/node_settings.inc
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/signup/includes/node_settings.inc,v
+retrieving revision 1.5
+diff -u -p -r1.5 node_settings.inc
+--- includes/node_settings.inc	21 Sep 2009 05:23:02 -0000	1.5
++++ includes/node_settings.inc	27 Nov 2009 16:20:53 -0000
+@@ -38,14 +38,11 @@ function signup_node_settings_form($form
+ 
+   // Load the default admin form data for new nodes.
+   if (!$node || !$node->signup) {
+-    $result = db_fetch_object(db_query("SELECT * FROM {signup} WHERE nid = 0"));
+-    $node->signup_forwarding_email = $result->forwarding_email;
+-    $node->signup_send_confirmation = $result->send_confirmation;
+-    $node->signup_confirmation_email = $result->confirmation_email;
+-    $node->signup_send_reminder = $result->send_reminder;
+-    $node->signup_reminder_days_before = $result->reminder_days_before;
+-    $node->signup_reminder_email = $result->reminder_email;
+-    $node->signup_close_signup_limit = $result->close_signup_limit;
++    $result = db_fetch_array(db_query("SELECT * FROM {signup} WHERE nid = 0"));
++    unset($result['nid']);
++    foreach ($result as $key => $signup_data) {
++      $node->{"signup_$key"} = $signup_data;
++    }
+   }
+ 
+   $form['signup_forwarding_email'] = array(

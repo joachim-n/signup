@@ -1,0 +1,5 @@
+; $Id: signup.info,v 1.6 2009/09/19 09:18:29 dww Exp $
+name = Signup
+description = "Allow users to sign up for content (especially events)."
+package = Signup
+core = 6.x

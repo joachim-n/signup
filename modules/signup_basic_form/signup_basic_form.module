@@ -1,0 +1,42 @@
+<?php
+// $Id$
+/**
+ * @file signup_basic_form.module
+ * TODO: Enter file description here.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function Xsignup_basic_form_menu() { 
+  // This is the minimum information you can provide for a menu item.
+  $items['TODO: Enter path'] = array(
+    'title' => 'TODO: Enter menu item title',
+    'page callback' => 'TODO: Enter callback function',
+    'access arguments' => array('TODO: Enter user permissions'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function Xsignup_basic_form_theme($existing, $type, $theme, $path) {
+
+}
+
+/**
+ * Implementation of hook_signup_form_info().
+ */
+function signup_basic_form_signup_form_info() {
+  return array(
+    'basic' => array(
+      'label' => 'Basic form',
+      'description' => 'Collects name and phone number.',
+      'form_callback' => 'signup_basic_form_form',
+    ),  
+  );
+}
+

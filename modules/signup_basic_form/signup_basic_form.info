@@ -1,0 +1,4 @@
+; $Id$
+name = Signup basic form
+description = Provides a basic form for signups with name and phone.
+core = 6.x

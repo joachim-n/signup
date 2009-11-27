@@ -1,0 +1,6 @@
+; $Id: signup_confirm_email.info,v 1.2 2009/09/19 09:18:29 dww Exp $
+name = Signup confirm e-mail
+description = "Adds a field to the signup form to confirm the user's e-mail address."
+dependencies[] = signup
+package = Signup
+core = 6.x
