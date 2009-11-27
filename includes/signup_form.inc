@@ -80,10 +80,9 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
     $signup_form_data = module_invoke_all('signup_form_info');
     if (isset($signup_form_data[$node->signup_form])) {
       $callback = $signup_form_data[$node->signup_form]['callback'];
+      $signup_form += $callback($form_state, $node, $signup_type);
     }
   }
-  
-  $signup_form += $callback($form_state, $node, $signup_type);
   
   $form['collapse']['signup_user_form'] = $signup_form;
   $form['collapse']['submit'] = array(
