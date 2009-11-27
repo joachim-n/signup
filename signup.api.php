@@ -8,6 +8,35 @@
  */
 
 /**
+ * Hook to define forms available to signups to insert into the signup form.
+ *
+ * Forms should be provided by callback functions as a FormAPI array.
+ * The callback should have the following signature:
+ *   function my_callback(&$form_state, $node, $signup_type = 'auth')
+ * See signup_basic_form_form for an example.
+ * The values submitted to the form elements defined by this form will be 
+ * serialized and stored in the {signup_log} table as 'form_data'.
+ *
+ * @return
+ *   An array of possible forms, keyed by a unique ID. Each value is itself an 
+ *   array of data, with the following key-value pairs:
+ *     - 'label': (required) The human-readable name of the form.
+ *     - 'description': (required) Extra information about the form.
+ *     - 'callback': (required) The name of a function.
+ *
+ * @see signup_basic_form_form.
+ */
+function hook_signup_form_info() {
+  return array(
+    'basic' => array(
+      'label' => 'Basic form',
+      'description' => 'Collects name and phone number.',
+      'callback' => 'signup_basic_form_form',
+    ),  
+  );
+}
+
+/**
  * Hook to alter signup data before a signup is inserted or updated.
  *
  * @param $signup
@@ -80,7 +109,7 @@ function hook_signup_update($signup) {
  *
  * This hook allows other modules to inject information into the custom signup
  * data for each signup.  The array is merged with the values of any custom
- * fields from theme_signup_user_form(), serialized, and stored in the
+ * fields from hook_signup_form_info(), serialized, and stored in the
  * {signup_log} database table.
  *
  * @param $node
@@ -94,7 +123,7 @@ function hook_signup_update($signup) {
  *   should be human-readable (and wrapped in t() to allow translation).
  *
  * @see signup_sign_up_user()
- * @see theme_signup_user_form()
+ * @see hook_signup_form_info()
  */
 function hook_signup_sign_up($node, $account) {
   return array(
