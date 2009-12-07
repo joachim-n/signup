@@ -46,8 +46,9 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_reminder_days_before = $result->reminder_days_before;
     $node->signup_reminder_email = $result->reminder_email;
     $node->signup_close_signup_limit = $result->close_signup_limit;
-    $node->signup_form = $result->form;
+    $node->signup_form_panes = $result->form_panes;
   }
+  dsm($node->signup_form_panes);
   
   // Get information about all potential form panes from modules that 
   // implement hook_signup_form_info.
@@ -65,11 +66,13 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     '#theme' => 'signup_node_settings_form_panes',
   );
   
+  // this gives us a list ordered by code def
+  // we want the enabled ones first and in order from DB
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
     $form['signup_form_panes'][$id]['enabled'] = array(
       '#type' => 'checkbox',
+      '#default_value' => isset($node->signup_form_panes[$id]),
       // Don't set the #title: we want it in a separate column. 
-      //'#default_value' => $pane['enabled'],
     );
     $form['signup_form_panes'][$id]['label'] = array(
       '#value' => $signup_form_pane['label'],
@@ -80,7 +83,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $form['signup_form_panes'][$id]['weight'] = array(
       '#type' => 'weight',
       '#delta' => 10,      
-      '#default_value' => 0, // $signup_form_pane['weight'], // @todo load
+      '#default_value' => isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id] : 10, // $signup_form_pane['weight'], // @todo load
       '#attributes' => array(
         'class' => "signup-pane-weight",
       ),
@@ -250,8 +253,11 @@ function signup_node_settings_form_submit($form, &$form_state) {
     if (count($form_state['values']['signup_form_panes']) == 1 && isset($signup_panes)) {
       $signup_panes[$pane_id] = 0;
     }
-    //dsm($signup_panes);
+    // Sort by weight, preserve keys.
+    asort($signup_panes);
+    // Serialize the array of setting for storage.
     $values['form_panes'] = serialize($signup_panes);
+    //dsm($signup_panes);
     
     // Populate $values from $form_state.
     foreach (array('forwarding_email', 'send_confirmation', 'confirmation_email', 'close_signup_limit') as $setting) {
