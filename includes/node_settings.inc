@@ -80,7 +80,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $form['signup_form_panes'][$id]['weight'] = array(
       '#type' => 'weight',
       '#delta' => 10,      
-      '#default_value' => $signup_form_pane['weight'], // @todo load
+      '#default_value' => 0, // $signup_form_pane['weight'], // @todo load
       '#attributes' => array(
         'class' => "signup-pane-weight",
       ),
@@ -239,17 +239,16 @@ function signup_node_settings_form_submit($form, &$form_state) {
     $values = db_fetch_array(db_query("SELECT form_panes, forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
   }
   else {
-    // Serialize all the settings for form panes.
+    // Serialize all the settings for form panes as $pane_id => weight.
     //dsm($form_state['values']['signup_form_panes']);
-    foreach ($form_state['values']['signup_form_panes'] as $key => $form_state_values_panes) {
+    foreach ($form_state['values']['signup_form_panes'] as $pane_id => $form_state_values_panes) {
       if ($form_state_values_panes['enabled']) {
-        $signup_panes[$key] = $form_state_values_panes;
-        // @todo storing 'enabled' keys is silly: we really only need to store key => weight
+        $signup_panes[$pane_id] = $form_state_values_panes['weight'];
       }
     }
     // Give a singleton pane a weight value, arbitrarily set to 0.
     if (count($form_state['values']['signup_form_panes']) == 1 && isset($signup_panes)) {
-      $signup_panes[$key]['weight'] = 0;
+      $signup_panes[$pane_id] = 0;
     }
     //dsm($signup_panes);
     $values['form_panes'] = serialize($signup_panes);
