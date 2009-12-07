@@ -86,7 +86,10 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
       ),
     );
   }
-  // @todo unset weight if only 1 element
+  // Unset weight if only 1 element
+  if (count($signup_form_pane_info) == 1) {
+    unset($form['signup_form_panes'][$id]['weight']);
+  }
 
   $form['signup_forwarding_email'] = array(
     '#type' => 'textfield',
@@ -205,12 +208,18 @@ function theme_signup_node_settings_form_panes($form) {
     );
   }
   
-  $header = array('Enabled', 'Weight', 'Name', 'Description');
+  $header[] = 'Enabled';
+  if (isset($form[$key]['weight'])) {
+    $header[] = 'Weight';
+  }
+  $header[] = 'Name';
+  $header[] = 'Description';
   
-  drupal_add_tabledrag('signup-node-settings-panes', 'order', 'sibling', 'signup-pane-weight');
-  
+  if (isset($form[$key]['weight'])) {  
+    drupal_add_tabledrag('signup-node-settings-panes', 'order', 'sibling', 'signup-pane-weight');
+  }
+    
   $output = drupal_render($form); // ???
-  $output .= 'Enable and order signup form panes:';
   $output .=  theme('table', $header, $rows, array('id' => 'signup-node-settings-panes'));
   return $output;
 }
