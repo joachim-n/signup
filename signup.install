@@ -16,8 +16,8 @@ function signup_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'form' => array(
-        'description' => t('Form to use for user signups'),
+      'form_panes' => array(
+        'description' => t('Serialized array of form panes and weights to use for user signups'),
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
@@ -502,7 +502,7 @@ function signup_update_6200() {
     'default' => '',
     'initial' => '',
   );
-  db_add_field($ret, 'signup', 'form', $field);
+  db_add_field($ret, 'signup', 'form_panes', $field);
   return $ret;
 }
 
