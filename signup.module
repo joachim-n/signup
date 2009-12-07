@@ -166,6 +166,11 @@ function signup_theme() {
         'view' => NULL,
       ),
     ),
+    'signup_node_settings_form_panes' => array(
+      'file' => 'node_settings.inc',
+      'path' => drupal_get_path('module', 'signup') . '/includes',
+      'arguments' => array('form'),
+    ),
   );
 }
 

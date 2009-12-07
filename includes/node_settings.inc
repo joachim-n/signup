@@ -49,18 +49,44 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_form = $result->form;
   }
   
-  $signup_forms = module_invoke_all('signup_form_info');
-  $options['none'] = 'No form';
-  foreach ($signup_forms as $id => $signup_form_data) {
-    $options[$id] = $signup_form_data['label'];
+  // Get information about all potential form panes from modules that 
+  // implement hook_signup_form_info.
+  $signup_form_pane_info = module_invoke_all('signup_form_info');
+  // @todo: unpack node pane settings
+  // @todo: order by weight
+  //dsm($signup_forms);
+  
+  $form['signup_form_panes'] = array(
+    // This gets a label on the whole table; not sure this is the best approach though.
+    // Improvements welcome.
+    '#type' => 'item',
+    '#title' => t('Signup form panes'),
+    '#tree' => TRUE,
+    '#theme' => 'signup_node_settings_form_panes',
+  );
+  
+  foreach ($signup_form_pane_info as $id => $signup_form_pane) {
+    $form['signup_form_panes'][$id]['enabled'] = array(
+      '#type' => 'checkbox',
+      // Don't set the #title: we want it in a separate column. 
+      //'#default_value' => $pane['enabled'],
+    );
+    $form['signup_form_panes'][$id]['label'] = array(
+      '#value' => $signup_form_pane['label'],
+    );
+    $form['signup_form_panes'][$id]['description'] = array(
+      '#value' => $signup_form_pane['description'],
+    );
+    $form['signup_form_panes'][$id]['weight'] = array(
+      '#type' => 'weight',
+      '#delta' => 10,      
+      '#default_value' => $signup_form_pane['weight'], // @todo load
+      '#attributes' => array(
+        'class' => "signup-pane-weight",
+      ),
+    );
   }
-  $form['signup_form'] = array(
-    '#type' => 'select',
-    '#title' => t('Signup form'),
-    '#options' => $options,
-    '#default_value' => $node->signup_form,
-    '#description' => t('The form to use for signing up.'),
-  );  
+  // @todo unset weight if only 1 element
 
   $form['signup_forwarding_email'] = array(
     '#type' => 'textfield',
@@ -159,6 +185,37 @@ function signup_node_settings_page($node) {
 }
 
 /**
+ * Theme function for the panes table in the node settings form.
+ */
+function theme_signup_node_settings_form_panes($form) {
+  // Based on taxonomy.admin.inc
+  foreach (element_children($form) as $key) {
+    $row = array();
+    $row[] = drupal_render($form[$key]['enabled']);
+    if (isset($form[$key]['weight'])) {
+      $form[$key]['weight']['#attributes']['class'] = 'signup-pane-weight';
+      $row[] = drupal_render($form[$key]['weight']);
+    }
+    $row[] = drupal_render($form[$key]['label']);
+    $row[] = drupal_render($form[$key]['description']);
+    
+    $rows[] = array(
+      'data' => $row,
+      'class' => 'draggable',
+    );
+  }
+  
+  $header = array('Enabled', 'Weight', 'Name', 'Description');
+  
+  drupal_add_tabledrag('signup-node-settings-panes', 'order', 'sibling', 'signup-pane-weight');
+  
+  $output = drupal_render($form); // ???
+  $output .= 'Enable and order signup form panes:';
+  $output .=  theme('table', $header, $rows, array('id' => 'signup-node-settings-panes'));
+  return $output;
+}
+
+/**
  * Submit handler for the per-node signup settings form.
  *
  * @param $form_id
@@ -167,6 +224,10 @@ function signup_node_settings_page($node) {
  *   The constructed form values array of the submitted form.
  */
 function signup_node_settings_form_submit($form, &$form_state) {
+  
+  dsm($form_state);
+  // find stuff in values']['signup_form_panes'] chidlren
+  
   $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
   if ($op == t('Reset to defaults')) {
     // If we're resetting, we just want to grab the site-wide defaults.
