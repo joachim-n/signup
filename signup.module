@@ -761,12 +761,13 @@ function signup_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $node->signup_reminder_days_before = $signup->reminder_days_before;
         $node->signup_reminder_email = $signup->reminder_email;
         $node->signup_close_signup_limit = $signup->close_signup_limit;
-        $node->signup_form = $signup->form;        
+        $node->signup_form_panes = $signup->form_panes;        
         $node->signup_status = $signup->status;
         if ($node->nid) {
           $node->signup_total = db_result(db_query("SELECT COUNT(*) FROM {signup_log} WHERE nid = %d", $node->nid));
           $node->signup_effective_total = db_result(db_query("SELECT SUM(count_towards_limit) FROM {signup_log} WHERE nid = %d", $node->nid));
         }
+        $node->signup_form_panes = unserialize($node->signup_form_panes);
       }
       else {
         $node->signup = 0;
