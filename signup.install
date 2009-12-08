@@ -17,7 +17,7 @@ function signup_schema() {
         'default' => 0,
       ),
       'form_panes' => array(
-        'description' => t('Serialized array of form panes and weights to use for user signups'),
+        'description' => t('Serialized array of form panes and weights to use for user signups. Associative array of the form $pane_id => $weight.'),
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
@@ -495,7 +495,7 @@ function signup_update_6003() {
 function signup_update_6200() {
   $ret = array();
   $field = array(
-    'description' => t('Form to use for user signups'),
+    'description' => t('Serialized array of form panes and weights to use for user signups. Associative array of the form $pane_id => $weight.'),
     'type' => 'varchar',
     'length' => 64,
     'not null' => TRUE,
