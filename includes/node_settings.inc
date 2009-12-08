@@ -48,15 +48,22 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_close_signup_limit = $result->close_signup_limit;
     $node->signup_form_panes = $result->form_panes;
   }
-  dsm($node->signup_form_panes);
+  //dsm($node->signup_form_panes);
   
   // Get information about all potential form panes from modules that 
   // implement hook_signup_form_info.
   $signup_form_pane_info = module_invoke_all('signup_form_info');
-  // @todo: unpack node pane settings
-  // @todo: order by weight
-  //dsm($signup_forms);
   
+  // Put in weights from either saved settings or for panes not enabled on this 
+  // node a default heavy weight of 10.
+  foreach ($signup_form_pane_info as $id => $signup_form_pane) {
+    $signup_form_pane_info[$id]['weight'] = isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id] : 10;
+  }
+  // Sort the list by weight so it appears correctly in the UI.
+  uasort($signup_form_pane_info, '_singup_cmp_weight'); 
+  //dsm($signup_form_pane_info);
+  
+  // The label and the theme function for the form panes table.
   $form['signup_form_panes'] = array(
     // This gets a label on the whole table; not sure this is the best approach though.
     // Improvements welcome.
@@ -66,8 +73,6 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     '#theme' => 'signup_node_settings_form_panes',
   );
   
-  // this gives us a list ordered by code def
-  // we want the enabled ones first and in order from DB
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
     $form['signup_form_panes'][$id]['enabled'] = array(
       '#type' => 'checkbox',
@@ -83,13 +88,13 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $form['signup_form_panes'][$id]['weight'] = array(
       '#type' => 'weight',
       '#delta' => 10,      
-      '#default_value' => isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id] : 10, // $signup_form_pane['weight'], // @todo load
+      '#default_value' => $signup_form_pane['weight'],
       '#attributes' => array(
         'class' => "signup-pane-weight",
       ),
     );
   }
-  // Unset weight if only 1 element
+  // Unset weight item if only 1 element
   if (count($signup_form_pane_info) == 1) {
     unset($form['signup_form_panes'][$id]['weight']);
   }
@@ -191,6 +196,13 @@ function signup_node_settings_page($node) {
 }
 
 /**
+ * Helper function to sort signup panes by their weight key.
+ */
+function _singup_cmp_weight($a, $b) {
+  return $a['weight'] - $b['weight'];
+}
+
+/**
  * Theme function for the panes table in the node settings form.
  */
 function theme_signup_node_settings_form_panes($form) {
@@ -208,6 +220,16 @@ function theme_signup_node_settings_form_panes($form) {
     $rows[] = array(
       'data' => $row,
       'class' => 'draggable',
+    );
+  }
+  // A message if there are no rows.
+  // @todo: figure out why the form label doesn't show in this case.
+  if (!count($rows)) {
+    $rows[] = array(
+      array(
+        'data' => 'No form panes are available.',
+        'colspan' => 3,
+      )
     );
   }
   
