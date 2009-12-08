@@ -14,15 +14,27 @@ function signup_basic_form_signup_form_info() {
       'label' => 'Name and phone number',
       'description' => 'Collects name and phone number.',
       'callback' => 'signup_basic_form_form',
-    ), 
-    /* 
+    ),
+    // this is just an extra item to test things.
     'silly' => array(
       'label' => 'Favourite colour',
       'description' => 'Should probably be blue.',
-      'callback' => 'signup_basic_form_form',
+      'callback' => 'signup_basic_form_silly',
     ),
-    */  
   );
+}
+
+// silly! just here for testing!
+function signup_basic_form_silly(&$form_state, $node, $signup_type = 'auth') {
+  $form['signup_form_silly']['#tree'] = TRUE;
+
+  $form['signup_form_silly']['Name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Favourite colour'),
+    '#size' => 40, '#maxlength' => 64,
+    '#required' => TRUE,
+  );
+  return $form;
 }
 
 
@@ -33,15 +45,16 @@ function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
   // TODO??????
   // If this function is providing any extra fields at all, the following
   // line is required for form form to work -- DO NOT EDIT OR REMOVE.
-  $form['signup_form_data']['#tree'] = TRUE;
+  // @todo: prefix all these items with a safe namespace!!!!
+  $form['signup_form_basic']['#tree'] = TRUE;
 
-  $form['signup_form_data']['Name'] = array(
+  $form['signup_form_basic']['Name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#size' => 40, '#maxlength' => 64,
     '#required' => TRUE,
   );
-  $form['signup_form_data']['Phone'] = array(
+  $form['signup_form_basic']['Phone'] = array(
     '#type' => 'textfield',
     '#title' => t('Phone'),
     '#size' => 40, '#maxlength' => 64,
@@ -50,7 +63,7 @@ function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
   // If the user is logged in, fill in their name by default,
   // except in the special case where the admin user is adding other users.
   if ($user->uid && $signup_type != 'admin') {
-    $form['signup_form_data']['Name']['#default_value'] = $user->name;
+    $form['signup_form_basic']['Name']['#default_value'] = $user->name;
   }
 
   return $form;
