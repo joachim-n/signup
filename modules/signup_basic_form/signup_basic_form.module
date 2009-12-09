@@ -2,11 +2,15 @@
 // $Id$
 /**
  * @file signup_basic_form.module
- * TODO: Enter file description here.
+ * Provides a basic signup form pane to collect participant name and phone.
+ *
+ * Comments a-plenty as this is also the example of how to use the API.
  */
 
 /**
  * Implementation of hook_signup_form_info().
+ *
+ * This should return an associative array of data about signup form panes.
  */
 function signup_basic_form_signup_form_info() {
   return array(
@@ -26,9 +30,7 @@ function signup_basic_form_signup_form_info() {
 
 // silly! just here for testing!
 function signup_basic_form_silly(&$form_state, $node, $signup_type = 'auth') {
-  $form['signup_form_silly']['#tree'] = TRUE;
-
-  $form['signup_form_silly']['Name'] = array(
+  $form['favorite_color'] = array(
     '#type' => 'textfield',
     '#title' => t('Favourite colour'),
     '#size' => 40, '#maxlength' => 64,
@@ -37,24 +39,22 @@ function signup_basic_form_silly(&$form_state, $node, $signup_type = 'auth') {
   return $form;
 }
 
-
+/**
+ * Signup form pane callback for the basic name and phone form.
+ *
+ * @todo figure out what $signup_type is!!! grep the old code!
+ */
 function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
   global $user;
   $form = array();
 
-  // TODO??????
-  // If this function is providing any extra fields at all, the following
-  // line is required for form form to work -- DO NOT EDIT OR REMOVE.
-  // @todo: prefix all these items with a safe namespace!!!!
-  $form['signup_form_basic']['#tree'] = TRUE;
-
-  $form['signup_form_basic']['Name'] = array(
+  $form['Name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#size' => 40, '#maxlength' => 64,
     '#required' => TRUE,
   );
-  $form['signup_form_basic']['Phone'] = array(
+  $form['Phone'] = array(
     '#type' => 'textfield',
     '#title' => t('Phone'),
     '#size' => 40, '#maxlength' => 64,
@@ -63,7 +63,7 @@ function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
   // If the user is logged in, fill in their name by default,
   // except in the special case where the admin user is adding other users.
   if ($user->uid && $signup_type != 'admin') {
-    $form['signup_form_basic']['Name']['#default_value'] = $user->name;
+    $form['Name']['#default_value'] = $user->name;
   }
 
   return $form;
