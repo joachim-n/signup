@@ -77,17 +77,23 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
 
   // Insert the form components provided by other modules.
   if (isset($node->signup_form_panes)) {
-    dsm($node->signup_form_panes);
+    //dsm($node->signup_form_panes);
     $signup_form_pane_info = module_invoke_all('signup_form_info');
     // Add each pane to the form. The node settings are stored in the weighted
     // order so there is no need for further sorting here.
     foreach ($node->signup_form_panes as $pane_id => $weight) {
       if (isset($signup_form_pane_info[$pane_id])) {
         $callback = $signup_form_pane_info[$pane_id]['callback'];
-        $signup_form += $callback($form_state, $node, $signup_type);
+        // Each pane goes into its own form element with #tree set
+        // to protect form values from clashing.
+        $signup_form[$pane_id] = array(
+          '#tree' => TRUE,
+        );
+        $signup_form[$pane_id] += $callback($form_state, $node, $signup_type);
       }
     }
   }
+  dsm($signup_form);
   
   $form['collapse']['signup_user_form'] = $signup_form;
   $form['collapse']['submit'] = array(
