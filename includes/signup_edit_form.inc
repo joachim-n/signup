@@ -87,6 +87,8 @@ function signup_edit_form($form_state, $signup, $type) {
 
   // Build the extra signup form for this site and include that.
   if ($node->signup_form != 'none') {
+    // @todo this doesn't work at all right now 
+    // but can't even figure out where this form is used!
     $signup_form_data = module_invoke_all('signup_form_info');
     if (isset($signup_form_data[$node->signup_form])) {
       $callback = $signup_form_data[$node->signup_form]['callback'];
@@ -100,6 +102,7 @@ function signup_edit_form($form_state, $signup, $type) {
   // with signup_fields and friends, but for now it works.
   foreach ($form_data as $key => $value) {
     if (!empty($custom_form['signup_form_data'][$key])) {
+      // @todo!!! oops. what do we do about signup_form_data key name???
       $custom_form['signup_form_data'][$key]['#default_value'] = $value;
       if (!$can_edit) {
         // If they can't edit, mark all the fields as disabled.
