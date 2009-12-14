@@ -1177,8 +1177,9 @@ function signup_content_types() {
  *   highly recommended to call the signup_validate_anon_email
  *   function in the external module's validation cycle or perform
  *   that function's validation logic prior to passing in this element!
- * $signup_form['signup_form_data'] : an array of key/value pairs --
- *   key is the data category, value is the user input
+ * $signup_form['signup_form_data'] : an associative array of extra data, 
+ *   keyed by signup form pane id. The vaklue is itself an array in the same
+ *   format as a $form_values array, that is, form_element => value.
  *
  * @param $notify_user
  *   When set to TRUE, confirmation messages are displayed via
@@ -1232,6 +1233,8 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
     $signup_info = array();
     if (!empty($signup_form['signup_form_data'])) {
       $signup_info = $signup_form['signup_form_data'];
+      // @todo? the form element keys are saved as keys and
+      // later shown in the signup record: these are not very human-friendly.
     }
     if (!empty($extra)) {
       $signup_info = array_merge($signup_info, $extra);
