@@ -77,7 +77,11 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
 
   // Insert the form components provided by other modules.
   if (isset($node->signup_form_panes)) {
+    $signup_form['signup_form_data'] = array(
+      '#tree' => TRUE,
+    );
     //dsm($node->signup_form_panes);
+    // @todo consider caching this info array
     $signup_form_pane_info = module_invoke_all('signup_form_info');
     // Add each pane to the form. The node settings are stored in the weighted
     // order so there is no need for further sorting here.
@@ -86,10 +90,10 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
         $callback = $signup_form_pane_info[$pane_id]['callback'];
         // Each pane goes into its own form element with #tree set
         // to protect form values from clashing.
-        $signup_form[$pane_id] = array(
+        $signup_form['signup_form_data'][$pane_id] = array(
           '#tree' => TRUE,
         );
-        $signup_form[$pane_id] += $callback($form_state, $node, $signup_type);
+        $signup_form['signup_form_data'][$pane_id] += $callback($form_state, $node, $signup_type);
       }
     }
   }
