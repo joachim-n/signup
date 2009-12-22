@@ -10,7 +10,26 @@
 /**
  * Implementation of hook_signup_form_info().
  *
- * This should return an associative array of data about signup form panes.
+ * Defines panes available to singup forms.
+ * 
+ * @return
+ *  An associative array of data about signup form panes. 
+ *  The key is the pane ID. The value is itself an associative array of the
+ *  following form:
+ *    - label: A label for the admin UI.
+ *    - description: A longer description for the admin UI.
+ *    - callback: A callback function to generate the form.
+ *  The callback function should have the following signature:
+ *  function mycallback(&$form_state, $node, $pane_id, $signup_type = 'auth')
+ *  where the parameters are:
+ *  - $form_state: Incoming array from the form builder function.
+ *  - $node: The fully loaded node object.
+ *  - $pane_id: The id of the pane currently being invoked. This allows a module
+ *    to use one callback for several panes.
+ *  - $signup_type: The type of signup, which may influence what form is returned:
+ *    - 'auth' -- regular authenticated user signup form
+ *    - 'anon' -- anonymous user signup form (main form includes required email field).
+ *    - 'admin' -- admin form to signup another user (main form includes user selector).
  */
 function signup_basic_form_signup_form_info() {
   return array(
@@ -29,7 +48,7 @@ function signup_basic_form_signup_form_info() {
 }
 
 // silly! just here for testing!
-function signup_basic_form_silly(&$form_state, $node, $signup_type = 'auth') {
+function signup_basic_form_silly(&$form_state, $node, $pane_id, $signup_type = 'auth') {
   $form['favorite_color'] = array(
     '#type' => 'textfield',
     '#title' => t('Favourite colour'),
