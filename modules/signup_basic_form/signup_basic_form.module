@@ -42,7 +42,13 @@ function signup_basic_form_silly(&$form_state, $node, $signup_type = 'auth') {
 /**
  * Signup form pane callback for the basic name and phone form.
  *
- * @todo figure out what $signup_type is!!! grep the old code!
+ * @param $node
+ *   The fully loaded node object.
+ * @param $signup_type
+ *   Determines what kind of signup to generate a form for. Possible values:
+ *    'auth' -- regular authenticated user signup form
+ *    'anon' -- anonymous user signup form (includes required email field).
+ *    'admin' -- admin form to signup another user (includes user selector).
  */
 function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
   global $user;
