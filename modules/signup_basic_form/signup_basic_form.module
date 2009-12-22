@@ -20,7 +20,7 @@
  *    - description: A longer description for the admin UI.
  *    - callback: A callback function to generate the form.
  *  The callback function should have the following signature:
- *  function mycallback(&$form_state, $node, $pane_id, $signup_type = 'auth')
+ *   function my_callback(&$form_state, $node, $pane_id, $signup_type = 'auth')
  *  where the parameters are:
  *  - $form_state: Incoming array from the form builder function.
  *  - $node: The fully loaded node object.

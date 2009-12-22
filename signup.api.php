@@ -8,11 +8,11 @@
  */
 
 /**
- * Hook to define forms available to signups to insert into the signup form.
+ * Hook to define panes available to insert into the signup form.
  *
- * Forms should be provided by callback functions as a FormAPI array.
+ * Panes should be provided by callback functions as a FormAPI array.
  * The callback should have the following signature:
- *   function my_callback(&$form_state, $node, $signup_type = 'auth')
+ *   function my_callback(&$form_state, $node, $pane_id, $signup_type = 'auth')
  * See signup_basic_form_form for an example.
  * The values submitted to the form elements defined by this form will be 
  * serialized and stored in the {signup_log} table as 'form_data'.
