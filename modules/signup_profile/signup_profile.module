@@ -58,6 +58,12 @@ function _signup_profile_available_categories() {
 /**
  * Signup form pane callback.
  *
+ * @param &$signup_form
+ *   The form array for the whole signup. You should not alter this, but it
+ *   contains useful data depending on circumstances, such as the signup 
+ *   object (in $form['#signup']) when an existing signup is being edited.
+ * @param &$form_state
+ *   Likewise.
  * @param $node
  *   The fully loaded node object.
  * @param $pane_id
@@ -69,7 +75,7 @@ function _signup_profile_available_categories() {
  *    'anon' -- anonymous user signup form (includes required email field).
  *    'admin' -- admin form to signup another user (includes user selector).
  */
-function signup_profile_form(&$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   global $user;
   $form = array();
   

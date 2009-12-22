@@ -20,7 +20,7 @@
  *    - description: A longer description for the admin UI.
  *    - callback: A callback function to generate the form.
  *  The callback function should have the following signature:
- *   function my_callback(&$form_state, $node, $pane_id, $signup_type = 'auth')
+ *   function my_callback(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth')
  *  where the parameters are:
  *  - $form_state: Incoming array from the form builder function.
  *  - $node: The fully loaded node object.
@@ -48,7 +48,7 @@ function signup_basic_form_signup_pane_info() {
 }
 
 // silly! just here for testing!
-function signup_basic_form_silly(&$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_basic_form_silly(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   $form['favorite_color'] = array(
     '#type' => 'textfield',
     '#title' => t('Favourite colour'),
@@ -61,6 +61,12 @@ function signup_basic_form_silly(&$form_state, $node, $pane_id, $signup_type = '
 /**
  * Signup form pane callback for the basic name and phone form.
  *
+ * @param &$signup_form
+ *   The form array for the whole signup. You should not alter this, but it
+ *   contains useful data depending on circumstances, such as the signup 
+ *   object (in $form['#signup']) when an existing signup is being edited.
+ * @param &$form_state
+ *   Likewise. You might need this, but you probably don't.
  * @param $node
  *   The fully loaded node object.
  * @param $pane_id
@@ -72,7 +78,7 @@ function signup_basic_form_silly(&$form_state, $node, $pane_id, $signup_type = '
  *    'anon' -- anonymous user signup form (includes required email field).
  *    'admin' -- admin form to signup another user (includes user selector).
  */
-function signup_basic_form_form(&$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_basic_form_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   global $user;
   $form = array();
 
