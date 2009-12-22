@@ -148,6 +148,39 @@ function signup_schema() {
     ),
   );
 
+  $schema['signup_panes'] = array(
+    'description' => t('Signup panes for each signup node.'),
+    'fields' => array(
+      'nid' => array(
+        'description' => t('Node ID'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'pane_id' => array(
+        'description' => t('Pane ID as defined by hook_signup_form_info().'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The weight of this pane in relation to other panes for the node.',
+      ),
+    ),
+    'indexes' => array(
+      'nid'        => array('nid'),
+      ),
+    'unique keys' => array(
+      'nid_pane_id' => array('nid', 'pane_id'),
+    ),
+  );
+
   return $schema;
 }
 
@@ -490,19 +523,14 @@ function signup_update_6003() {
 }
 
 /**
- * Add the 'form' field to the {signup} table.
+ * Create the {signup_panes} table.
  */
 function signup_update_6200() {
   $ret = array();
-  $field = array(
-    'description' => t('Serialized array of form panes and weights to use for user signups. Associative array of the form $pane_id => $weight.'),
-    'type' => 'varchar',
-    'length' => 64,
-    'not null' => TRUE,
-    'default' => '',
-    'initial' => '',
-  );
-  db_add_field($ret, 'signup', 'form_panes', $field);
+  
+  $schema = signup_schema();
+  db_create_table(&$ret, 'signup_panes', $schema['signup_panes']);
+  
   return $ret;
 }
 

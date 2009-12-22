@@ -259,27 +259,35 @@ function theme_signup_node_settings_form_panes($form) {
  *   The constructed form values array of the submitted form.
  */
 function signup_node_settings_form_submit($form, &$form_state) {
+  $node = $form['#node'];
   $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
   if ($op == t('Reset to defaults')) {
     // If we're resetting, we just want to grab the site-wide defaults.
-    $values = db_fetch_array(db_query("SELECT form_panes, forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
+    $values = db_fetch_array(db_query("SELECT forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
+    // @todo: delete the signup_panes entries.
   }
   else {
-    // Serialize all the settings for form panes as $pane_id => weight.
+    // Handle the pane settings.
     //dsm($form_state['values']['signup_form_panes']);
     foreach ($form_state['values']['signup_form_panes'] as $pane_id => $form_state_values_panes) {
       if ($form_state_values_panes['enabled']) {
         $signup_panes[$pane_id] = $form_state_values_panes['weight'];
       }
     }
-    // Give a singleton pane a weight value, arbitrarily set to 0.
-    if (count($form_state['values']['signup_form_panes']) == 1 && isset($signup_panes)) {
-      $signup_panes[$pane_id] = 0;
+    // Clear all the panes for the node.
+    db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);    
+    // If there are enabled panes, save them.
+    if (count($signup_panes)) {
+      // Give a singleton pane a weight value, arbitrarily set to 0.
+      if (count($signup_panes) == 1) {
+        $signup_panes[$pane_id] = 0;
+      }
+      // Sort by weight, preserve keys.
+     // obsolete asort($signup_panes);
+      foreach ($signup_panes as $pane_id => $weight) {
+        db_query("INSERT INTO {signup_panes} (nid, pane_id, weight) VALUES (%d, '%s', %d)", $node->nid, $pane_id, $weight);
+      }
     }
-    // Sort by weight, preserve keys.
-    asort($signup_panes);
-    // Serialize the array of setting for storage.
-    $values['form_panes'] = serialize($signup_panes);
     //dsm($signup_panes);
     
     // Populate $values from $form_state.
@@ -297,9 +305,8 @@ function signup_node_settings_form_submit($form, &$form_state) {
 
   // Either way, we want to make sure we're updating the values for the
   // current node, not nid 0...
-  $node = $form['#node'];
   $values[] = $node->nid;
-  db_query("UPDATE {signup} SET form_panes = '%s', forwarding_email = '%s', send_confirmation = %d, confirmation_email = '%s', close_signup_limit = %d, send_reminder = %d, reminder_days_before = %d, reminder_email = '%s' WHERE nid = %d", $values);
+  db_query("UPDATE {signup} SET forwarding_email = '%s', send_confirmation = %d, confirmation_email = '%s', close_signup_limit = %d, send_reminder = %d, reminder_days_before = %d, reminder_email = '%s' WHERE nid = %d", $values);
 
   // See if the limit changed, and if so, take any necessary action.
   if ($node->signup_close_signup_limit != $form_state['values']['signup_close_signup_limit']) {

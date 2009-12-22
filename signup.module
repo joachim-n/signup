@@ -742,6 +742,7 @@ function signup_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'delete':
         // Clean up the signup tables for the deleted node.
         db_query("DELETE FROM {signup} WHERE nid = %d", $node->nid);
+        db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);
         db_query("DELETE FROM {signup_log} WHERE nid = %d", $node->nid);
       break;
 
@@ -767,7 +768,12 @@ function signup_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           $node->signup_total = db_result(db_query("SELECT COUNT(*) FROM {signup_log} WHERE nid = %d", $node->nid));
           $node->signup_effective_total = db_result(db_query("SELECT SUM(count_towards_limit) FROM {signup_log} WHERE nid = %d", $node->nid));
         }
-        $node->signup_form_panes = unserialize($node->signup_form_panes);
+        // Load pane data
+        $result = db_query("SELECT * FROM {signup_panes} WHERE nid = %d ORDER BY weight", $node->nid);
+        $node->signup_form_panes = array();
+        while ($pane_data = db_fetch_array($result)) {
+          $node->signup_form_panes[$pane_data['pane_id']] = $pane_data['weight'];
+        }
       }
       else {
         $node->signup = 0;
