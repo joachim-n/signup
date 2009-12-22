@@ -85,31 +85,37 @@ function signup_edit_form($form_state, $signup, $type) {
     );
   }
 
-  // Build the extra signup form for this site and include that.
-  if ($node->signup_form != 'none') {
-    // @todo this doesn't work at all right now 
-    // but can't even figure out where this form is used!
+  // Build all the signup panes for this node.
+  if (isset($node->signup_form_panes)) {
+    $custom_form = array();
     $signup_form_data = module_invoke_all('signup_form_info');
-    if (isset($signup_form_data[$node->signup_form])) {
-      $callback = $signup_form_data[$node->signup_form]['callback'];
-      $custom_form = $callback($form_state, $node, $signup_type);
-    }
-  }
-  $form_data = unserialize($signup->form_data);
-
-  // This is sort of a hack, but we don't support nested arrays for the custom
-  // signup form anyway, so it works for now.  Obviously all this will change
-  // with signup_fields and friends, but for now it works.
-  foreach ($form_data as $key => $value) {
-    if (!empty($custom_form['signup_form_data'][$key])) {
-      // @todo!!! oops. what do we do about signup_form_data key name???
-      $custom_form['signup_form_data'][$key]['#default_value'] = $value;
-      if (!$can_edit) {
-        // If they can't edit, mark all the fields as disabled.
-        $custom_form['signup_form_data'][$key]['#disabled'] = TRUE;
+    foreach (array_keys($node->signup_form_panes) as $pane_id) {
+      if (isset($signup_form_data[$pane_id])) {
+        $callback = $signup_form_data[$pane_id]['callback'];
+        // @bug @todo: no value set for $signup_type here!
+        $custom_form[$pane_id] = $callback($form_state, $node, $signup_type);
       }
     }
   }
+
+  $form_data = unserialize($signup->form_data);
+  // This is *still* sort of a hack, and means that nested arrays in signup 
+  // form panes won't work. 
+  // Does Drupal FormAPI provide a means to re-fill a $form array with values
+  // from a $form_values array? It really should.
+  // @todo: consider letting each module callback fill in its values
+  foreach ($form_data as $pane_id => $pane_data) {
+    foreach ($pane_data as $key => $value) {
+      if (!empty($custom_form[$pane_id][$key])) {
+        $custom_form[$pane_id][$key]['#default_value'] = $value;
+        if (!$can_edit) {
+          // If they can't edit, mark all the fields as disabled.
+          $custom_form['signup_form_data'][$key]['#disabled'] = TRUE;
+        }
+      }
+    }
+  }
+  
   $form['elements'] += $custom_form;
 
   // Add the appropriate buttons based on permissions.

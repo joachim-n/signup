@@ -1262,6 +1262,7 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
     }
 
     // Invoke hook_signup_data_alter() to let other modules change this.
+    // @todo: document and make example of how modules should intercept here to save their own data
     drupal_alter('signup_data', $signup, $signup_form);
 
     // Insert the signup into the {signup_log} table.

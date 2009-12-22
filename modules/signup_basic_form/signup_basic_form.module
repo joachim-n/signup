@@ -66,6 +66,7 @@ function signup_basic_form_form(&$form_state, $node, $signup_type = 'auth') {
     '#size' => 40, '#maxlength' => 64,
   );
 
+  // @TODO: move to signup core.
   // If the user is logged in, fill in their name by default,
   // except in the special case where the admin user is adding other users.
   if ($user->uid && $signup_type != 'admin') {
