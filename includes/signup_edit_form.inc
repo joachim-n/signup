@@ -90,7 +90,7 @@ function signup_edit_form($form_state, $signup, $type) {
     $form['elements']['signup_form_data'] = array(
       '#tree' => TRUE,
     );
-    $signup_form_data = module_invoke_all('signup_form_info');
+    $signup_form_data = module_invoke_all('signup_pane_info');
     foreach (array_keys($node->signup_form_panes) as $pane_id) {
       if (isset($signup_form_data[$pane_id])) {
         $callback = $signup_form_data[$pane_id]['callback'];

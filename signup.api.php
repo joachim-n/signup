@@ -26,7 +26,7 @@
  *
  * @see signup_basic_form_form.
  */
-function hook_signup_form_info() {
+function hook_signup_pane_info() {
   return array(
     'basic' => array(
       'label' => 'Basic form',
@@ -109,7 +109,7 @@ function hook_signup_update($signup) {
  *
  * This hook allows other modules to inject information into the custom signup
  * data for each signup.  The array is merged with the values of any custom
- * fields from hook_signup_form_info(), serialized, and stored in the
+ * fields from hook_signup_pane_info(), serialized, and stored in the
  * {signup_log} database table.
  *
  * @param $node
@@ -123,7 +123,7 @@ function hook_signup_update($signup) {
  *   should be human-readable (and wrapped in t() to allow translation).
  *
  * @see signup_sign_up_user()
- * @see hook_signup_form_info()
+ * @see hook_signup_pane_info()
  */
 function hook_signup_sign_up($node, $account) {
   return array(

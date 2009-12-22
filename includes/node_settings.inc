@@ -51,8 +51,8 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
   //dsm($node->signup_form_panes);
   
   // Get information about all potential form panes from modules that 
-  // implement hook_signup_form_info.
-  $signup_form_pane_info = module_invoke_all('signup_form_info');
+  // implement hook_signup_pane_info.
+  $signup_form_pane_info = module_invoke_all('signup_pane_info');
   
   // Put in weights from either saved settings or for panes not enabled on this 
   // node a default heavy weight of 10.

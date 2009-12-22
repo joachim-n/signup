@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of hook_signup_form_info().
+ * Implementation of hook_signup_pane_info().
  *
  * Defines panes available to singup forms.
  * 
@@ -31,7 +31,7 @@
  *    - 'anon' -- anonymous user signup form (main form includes required email field).
  *    - 'admin' -- admin form to signup another user (main form includes user selector).
  */
-function signup_basic_form_signup_form_info() {
+function signup_basic_form_signup_pane_info() {
   return array(
     'basic' => array(
       'label' => 'Name and phone number',

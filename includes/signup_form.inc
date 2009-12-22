@@ -82,7 +82,7 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
     );
     //dsm($node->signup_form_panes);
     // @todo consider caching this info array
-    $signup_form_pane_info = module_invoke_all('signup_form_info');
+    $signup_form_pane_info = module_invoke_all('signup_pane_info');
     // Add each pane to the form. The node settings are stored in the weighted
     // order so there is no need for further sorting here.
     foreach ($node->signup_form_panes as $pane_id => $weight) {

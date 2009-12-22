@@ -8,11 +8,11 @@
  */
 
 /**
- * Implementation of hook_signup_form_info().
+ * Implementation of hook_signup_pane_info().
  *
  * This should return an associative array of data about signup form panes.
  */
-function signup_profile_signup_form_info() {
+function signup_profile_signup_pane_info() {
   // Get the categories.
   $categories = profile_categories();
   // Get the number of fields in each category according to access. This will

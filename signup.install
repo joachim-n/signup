@@ -124,7 +124,7 @@ function signup_schema() {
         'default' => 0,
       ),
       'form_data' => array(
-        'description' => t('Serialized string of additional signup form values.  See hook_signup_form_info() for more information.'),
+        'description' => t('Serialized string of additional signup form values.  See hook_signup_pane_info() for more information.'),
         'type' => 'text',
         'size' => 'big',
         'not null' => TRUE,
@@ -159,7 +159,7 @@ function signup_schema() {
         'default' => 0,
       ),
       'pane_id' => array(
-        'description' => t('Pane ID as defined by hook_signup_form_info().'),
+        'description' => t('Pane ID as defined by hook_signup_pane_info().'),
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
