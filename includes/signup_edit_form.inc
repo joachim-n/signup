@@ -109,11 +109,14 @@ function signup_edit_form($form_state, $signup, $type) {
   // form panes won't work. 
   // Does Drupal FormAPI provide a means to re-fill a $form array with values
   // from a $form_values array? It really should.
-  // @todo: consider letting each module callback fill in its values
   foreach ($form_data as $pane_id => $pane_data) {
     foreach ($pane_data as $key => $value) {
       if (!empty($form['elements']['signup_form_data'][$pane_id][$key])) {
-        $form['elements']['signup_form_data'][$pane_id][$key]['#default_value'] = $value;
+        // The pane callback may have provided its own default values: if so
+        // then don't clobber them.
+        if (!isset($form['elements']['signup_form_data'][$pane_id][$key]['#default_value'])) {
+          $form['elements']['signup_form_data'][$pane_id][$key]['#default_value'] = $value;
+        }
         if (!$can_edit) {
           // If they can't edit, mark all the fields as disabled.
           // @todo @fixme this is not working.

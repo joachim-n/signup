@@ -1184,7 +1184,7 @@ function signup_content_types() {
  *   function in the external module's validation cycle or perform
  *   that function's validation logic prior to passing in this element!
  * $signup_form['signup_form_data'] : an associative array of extra data, 
- *   keyed by signup form pane id. The vaklue is itself an array in the same
+ *   keyed by signup form pane id. The value is itself an array in the same
  *   format as a $form_values array, that is, form_element => value.
  *
  * @param $notify_user
@@ -1268,7 +1268,6 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
     }
 
     // Invoke hook_signup_data_alter() to let other modules change this.
-    // @todo: document and make example of how modules should intercept here to save their own data
     drupal_alter('signup_data', $signup, $signup_form);
 
     // Insert the signup into the {signup_log} table.
