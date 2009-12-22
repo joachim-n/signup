@@ -1,5 +1,5 @@
 ; $Id$
 name = Signup basic form
-description = Provides a basic form for signups with name and phone.
+description = Provides a signup form pane for name and phone.
 package = Signup
 core = 6.x
