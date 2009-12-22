@@ -116,6 +116,7 @@ function signup_profile_signup_data_alter(&$signup, $form_values) {
     // $user we pass the account for the signup.
     profile_save_profile($profile_data, $account, $category_name, FALSE);
     
-    // @todo unset from the incoming data
+    // Unset our data from the signup so it's not saved redundantly.
+    unset($signup->form_data['profile_' . $category_name]);
   }
 }
