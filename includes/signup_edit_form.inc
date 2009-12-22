@@ -92,7 +92,6 @@ function signup_edit_form($form_state, $signup, $type) {
     foreach (array_keys($node->signup_form_panes) as $pane_id) {
       if (isset($signup_form_data[$pane_id])) {
         $callback = $signup_form_data[$pane_id]['callback'];
-        // @bug @todo: no value set for $signup_type here!
         $custom_form[$pane_id] = $callback($form_state, $node, $signup_type);
       }
     }
