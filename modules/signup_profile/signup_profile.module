@@ -52,7 +52,8 @@ function signup_profile_signup_form_info() {
 function signup_profile_form(&$form_state, $node, $signup_type = 'auth') {
   global $user;
   $form = array();
-
+  
+  // @todo. crib from uc_signup's stuff.
   $form['fish'] = array(
     '#type' => 'textfield',
     '#title' => t('Fish'),
