@@ -16,13 +16,6 @@ function signup_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'form_panes' => array(
-        'description' => t('Serialized array of form panes and weights to use for user signups. Associative array of the form $pane_id => $weight.'),
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'forwarding_email' => array(
         'description' => t('Email address to send signup notifications to.'),
         'type' => 'varchar',
@@ -219,10 +212,10 @@ function signup_uninstall() {
  * settings for new signup-enabled nodes.
  */
 function signup_insert_default_signup_info() {
-  return db_query("INSERT INTO {signup} (nid, form, forwarding_email,
+  return db_query("INSERT INTO {signup} (nid, forwarding_email,
     send_confirmation, confirmation_email,
     send_reminder, reminder_days_before, reminder_email,
-    close_in_advance_time, close_signup_limit, status) VALUES (0, 'basic', '',
+    close_in_advance_time, close_signup_limit, status) VALUES (0, '',
     1, 'Enter your default confirmation email message here',
     1, 1, 'Enter your default reminder email message here',
     0, 0, 1)");
