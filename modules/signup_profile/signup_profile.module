@@ -78,7 +78,6 @@ function _signup_profile_available_categories() {
  *   A form API array for insertion into the signup form. 
  */
 function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
-  global $user;
   $form = array();
   
   // BIG @TODO: what do we do if this is an anon???
@@ -93,9 +92,27 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   // - $user is not looked at at all.
   $form = profile_form_profile(array(), NULL, $category, FALSE);
 
-  // Our data is not in the signup data, so we should populate this form
-  // with our own default values.
-  // @todo
+  // Our data is not in the signup data, so we prepopulate this form
+  // with our own default values where applicable.
+  if (isset($signup_form['#signup']) && $signup_type != 'anon') {
+    // Existing signup: get the account.
+    $account = user_load($signup_form['#signup']->uid);
+  }
+  elseif ($signup_type == 'auth') {
+    // An authenticated user is signup themselves up. 
+    // Prefill their profile values so they can either leave them or know what 
+    // they are changing.
+    global $user;
+    // Need to do a user_load to get profile fields.
+    $account = user_load($user->uid);
+  }
+  
+  if (isset($account)) {
+    // Set the form's defaults to the profile values. 
+    foreach (element_children($form[$category]) as $key) {
+      $form[$category][$key]['#default_value'] = $account->$key;
+    }
+  }
     
   return $form;
 }
