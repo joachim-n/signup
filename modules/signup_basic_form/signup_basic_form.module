@@ -34,14 +34,14 @@
 function signup_basic_form_signup_pane_info() {
   return array(
     'basic' => array(
-      'label' => 'Name and phone number',
-      'description' => 'Collects name and phone number.',
+      'label' => t('Name and phone number'),
+      'description' => t('Collects name and phone number.'),
       'callback' => 'signup_basic_form_form',
     ),
     // this is just an extra item to test things.
     'silly' => array(
-      'label' => 'Favourite colour',
-      'description' => 'Should probably be blue.',
+      'label' => t('Favourite colour'),
+      'description' => t('Should probably be blue.'),
       'callback' => 'signup_basic_form_silly',
     ),
   );
