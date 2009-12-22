@@ -96,7 +96,7 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
       }
     }
   }
-  
+
   $form['collapse']['signup_user_form'] = $signup_form;
   $form['collapse']['submit'] = array(
     '#type' => 'submit',
