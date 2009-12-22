@@ -116,9 +116,8 @@ function signup_edit_form($form_state, $signup, $type) {
         $form['elements']['signup_form_data'][$pane_id][$key]['#default_value'] = $value;
         if (!$can_edit) {
           // If they can't edit, mark all the fields as disabled.
-          // @todo @fixme no idea what this does, commenting out has no effect
-          // so how are the form elements getting greyed out if not by this?
-          $form['elements']['signup_form_data']['#disabled'] = TRUE;
+          // @todo @fixme this is not working.
+          $form['elements']['signup_form_data'][$pane_id][$key]['#disabled'] = TRUE;
         }
       }
     }
