@@ -80,7 +80,6 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
     $signup_form['signup_form_data'] = array(
       '#tree' => TRUE,
     );
-    //dsm($node->signup_form_panes);
     // @todo consider caching this info array
     $signup_form_pane_info = module_invoke_all('signup_pane_info');
     // Add each pane to the form. The node settings are stored in the weighted
@@ -97,7 +96,6 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
       }
     }
   }
-  dsm($signup_form);
   
   $form['collapse']['signup_user_form'] = $signup_form;
   $form['collapse']['submit'] = array(

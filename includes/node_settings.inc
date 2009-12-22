@@ -48,7 +48,6 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_close_signup_limit = $result->close_signup_limit;
     $node->signup_form_panes = $result->form_panes;
   }
-  //dsm($node->signup_form_panes);
   
   // Get information about all potential form panes from modules that 
   // implement hook_signup_pane_info.
@@ -61,7 +60,6 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
   }
   // Sort the list by weight so it appears correctly in the UI.
   uasort($signup_form_pane_info, '_signup_cmp_weight'); 
-  //dsm($signup_form_pane_info);
   
   // The label and the theme function for the form panes table.
   $form['signup_form_panes'] = array(
@@ -268,7 +266,6 @@ function signup_node_settings_form_submit($form, &$form_state) {
   }
   else {
     // Handle the pane settings.
-    //dsm($form_state['values']['signup_form_panes']);
     foreach ($form_state['values']['signup_form_panes'] as $pane_id => $form_state_values_panes) {
       if ($form_state_values_panes['enabled']) {
         $signup_panes[$pane_id] = $form_state_values_panes['weight'];
@@ -288,7 +285,6 @@ function signup_node_settings_form_submit($form, &$form_state) {
         db_query("INSERT INTO {signup_panes} (nid, pane_id, weight) VALUES (%d, '%s', %d)", $node->nid, $pane_id, $weight);
       }
     }
-    //dsm($signup_panes);
     
     // Populate $values from $form_state.
     foreach (array('forwarding_email', 'send_confirmation', 'confirmation_email', 'close_signup_limit') as $setting) {

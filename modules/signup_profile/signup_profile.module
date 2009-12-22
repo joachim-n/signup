@@ -5,6 +5,8 @@
  * Provides integration with profile module.
  *
  * Comments a-plenty as this is also an example of how to use the API.
+ * This shows an example of how a signup pane can elect to do its own storage
+ * of its signup data rather than letting signup handle storage.
  */
 
 /**
@@ -16,6 +18,7 @@ function signup_profile_signup_pane_info() {
   // Get the categories.
   $categories = _signup_profile_available_categories();
   foreach ($categories as $category) {
+    // Make a pane for each category.
     $panes['profile_' . $category['name']] = array(
       'label' => 'Profile: ' . $category['name'],
       'description' => t('Collects @category profile fields.', array('@category' => $category['name'])),
@@ -81,6 +84,10 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   $form = array();
   
   // BIG @TODO: what do we do if this is an anon???
+  // maybe a setting to either:
+  //  a) create a user account based on the entered anon email
+  //  b) just don't show this pane and don't collect data
+  //  c) give the user the choice
   
   // Get the real category name from the prefixed pane ID.
   $category = substr($pane_id, 8);

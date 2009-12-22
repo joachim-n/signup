@@ -22,6 +22,7 @@
  *  The callback function should have the following signature:
  *   function my_callback(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth')
  *  where the parameters are:
+ *  - $signup_form: Incoming form array, for information only.
  *  - $form_state: Incoming array from the form builder function.
  *  - $node: The fully loaded node object.
  *  - $pane_id: The id of the pane currently being invoked. This allows a module
@@ -47,7 +48,9 @@ function signup_basic_form_signup_pane_info() {
   );
 }
 
-// silly! just here for testing!
+/**
+ * Silly example just here for testing!
+ */
 function signup_basic_form_silly(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   $form['favorite_color'] = array(
     '#type' => 'textfield',
