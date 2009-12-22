@@ -14,6 +14,31 @@
  */
 function signup_profile_signup_pane_info() {
   // Get the categories.
+  $categories = _signup_profile_available_categories();
+  foreach ($categories as $category) {
+    $panes['profile_' . $category['name']] = array(
+      'label' => 'Profile: ' . $category['name'],
+      'description' => t('Collects @category profile fields.', array('@category' => $category['name'])),
+      'callback' => 'signup_profile_form',
+    );
+  }
+  
+  return $panes;
+}
+
+/**
+ * Helper function to get profile categories that users have access to.
+ *
+ * This result is cached as we may need it several times.
+ */
+function _signup_profile_available_categories() {
+  static $available_categories;
+  
+  if (isset($available_categories)) {
+    return $available_categories;
+  }
+  
+  // Get all the categories.
   $categories = profile_categories();
   // Get the number of fields in each category according to access. This will
   // let us determine if a category actually applies.
@@ -21,18 +46,13 @@ function signup_profile_signup_pane_info() {
   while ($row = db_fetch_array($result)) {
     $categories_count[$row['category']] = $row['count'];
   }
-  
   foreach ($categories as $category) {
     if (isset($categories_count[$category['name']])) {
-      $panes['profile_' . $category['name']] = array(
-        'label' => 'Profile: ' . $category['name'],
-        'description' => t('Collects @category profile fields.', array('@category' => $category['name'])),
-        'callback' => 'signup_profile_form',
-      );
+      $available_categories[] = $category;
     }
   }
   
-  return $panes;
+  return $available_categories;
 }
 
 /**
@@ -49,17 +69,53 @@ function signup_profile_signup_pane_info() {
  *    'anon' -- anonymous user signup form (includes required email field).
  *    'admin' -- admin form to signup another user (includes user selector).
  */
-function signup_profile_form(&$form_state, $node, $signup_type = 'auth') {
+function signup_profile_form(&$form_state, $node, $pane_id, $signup_type = 'auth') {
   global $user;
   $form = array();
   
-  // @todo. crib from uc_signup's stuff.
-  $form['fish'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Fish'),
-    '#size' => 40, '#maxlength' => 64,
-    '#required' => TRUE,
-  );
+  // BIG @TODO: what do we do if this is an anon???
+  
+  // Get the real category name from the prefixed pane ID.
+  $category = substr($pane_id, 8);
+  
+  // Call profile.module's implementation of hook_user's form op.
+  // This is a smidgen hacky, but safe, as:
+  // - $edit is just checked for default values, passing nothing won't hurt. 
+  //   @todo: make this bit work for bonus points!
+  // - $user is not looked at at all.
+  $form = profile_form_profile(array(), NULL, $category, FALSE);
 
+  // Our data is not in the signup data, so we should populate this form
+  // with our own default values.
+  // @todo
+    
   return $form;
+}
+
+/**
+ * Implementation of hook_signup_data_alter().
+ *
+ * This allows us to alter the signup data prior to it being saved, do our own
+ * saving of profile data, and remove the profile data from the signup so it is
+ * not 
+ */
+function signup_profile_signup_data_alter(&$signup, $form_values) {
+  // BIG @TODO: what do we do if this is an anon???
+  
+  $account = user_load($signup->uid);
+  
+  // actually, could just as easily go over ALL cats and just check isset which we need to do anyway. DOH
+  $categories = _signup_profile_available_categories();
+  foreach ($categories as $category) {
+    $category_name = $category['name']; // save on nested [] eyeache
+    $profile_data = $signup->form_data['profile_' . $category_name][$category_name];
+    
+    // Again, a bit hackish, but probably safe to call:
+    // function profile_save_profile(&$edit, &$user, $category, $register = FALSE)
+    // $edit is an array of form element ID => value which we have too.
+    // $user we pass the account for the signup.
+    profile_save_profile($profile_data, $account, $category_name, FALSE);
+    
+    // @todo unset from the incoming data
+  }
 }
