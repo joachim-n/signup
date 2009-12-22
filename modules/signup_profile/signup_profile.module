@@ -1,0 +1,61 @@
+<?php
+// $Id$
+/**
+ * @file signup_profile.module
+ * Provides integration with profile module.
+ *
+ * Comments a-plenty as this is also an example of how to use the API.
+ */
+
+/**
+ * Implementation of hook_signup_form_info().
+ *
+ * This should return an associative array of data about signup form panes.
+ */
+function signup_profile_signup_form_info() {
+  // Get the categories.
+  $categories = profile_categories();
+  // Get the number of fields in each category according to access. This will
+  // let us determine if a category actually applies.
+  $result = db_query("SELECT category, COUNT(*) AS count FROM profile_fields  WHERE visibility <> 4 GROUP BY category", PROFILE_HIDDEN);
+  while ($row = db_fetch_array($result)) {
+    $categories_count[$row['category']] = $row['count'];
+  }
+  
+  foreach ($categories as $category) {
+    if (isset($categories_count[$category['name']])) {
+      $panes['profile_' . $category['name']] = array(
+        'label' => 'Profile: ' . $category['name'],
+        'description' => t('Collects @category profile fields.', array('@category' => $category['name'])),
+        'callback' => 'signup_profile_form',
+      );
+    }
+  }
+  
+  return $panes;
+}
+
+/**
+ * Signup form pane callback.
+ *
+ * @param $node
+ *   The fully loaded node object.
+ * @param $signup_type
+ *   Determines what kind of signup to generate a form for. Possible values:
+ *    'auth' -- regular authenticated user signup form
+ *    'anon' -- anonymous user signup form (includes required email field).
+ *    'admin' -- admin form to signup another user (includes user selector).
+ */
+function signup_profile_form(&$form_state, $node, $signup_type = 'auth') {
+  global $user;
+  $form = array();
+
+  $form['fish'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Fish'),
+    '#size' => 40, '#maxlength' => 64,
+    '#required' => TRUE,
+  );
+
+  return $form;
+}

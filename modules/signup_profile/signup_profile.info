@@ -1,0 +1,6 @@
+; $Id$
+name = Signup profile
+description = Provides a signup form pane integrated with profile module's fields.
+package = Signup
+dependencies[] = profile
+core = 6.x
