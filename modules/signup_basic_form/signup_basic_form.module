@@ -10,7 +10,7 @@
 /**
  * Implementation of hook_signup_pane_info().
  *
- * Defines panes available to singup forms.
+ * Defines panes available to signup forms.
  * 
  * @return
  *  An associative array of data about signup form panes. 

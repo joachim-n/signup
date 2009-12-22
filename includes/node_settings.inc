@@ -60,7 +60,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $signup_form_pane_info[$id]['weight'] = isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id] : 10;
   }
   // Sort the list by weight so it appears correctly in the UI.
-  uasort($signup_form_pane_info, '_singup_cmp_weight'); 
+  uasort($signup_form_pane_info, '_signup_cmp_weight'); 
   //dsm($signup_form_pane_info);
   
   // The label and the theme function for the form panes table.
@@ -199,7 +199,7 @@ function signup_node_settings_page($node) {
 /**
  * Helper function to sort signup panes by their weight key.
  */
-function _singup_cmp_weight($a, $b) {
+function _signup_cmp_weight($a, $b) {
   return $a['weight'] - $b['weight'];
 }
 
