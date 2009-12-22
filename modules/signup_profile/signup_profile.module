@@ -40,6 +40,9 @@ function signup_profile_signup_form_info() {
  *
  * @param $node
  *   The fully loaded node object.
+ * @param $pane_id
+ *   The pane ID being invoked. This allows a module to implement multiple panes
+ *   with one callback.
  * @param $signup_type
  *   Determines what kind of signup to generate a form for. Possible values:
  *    'auth' -- regular authenticated user signup form

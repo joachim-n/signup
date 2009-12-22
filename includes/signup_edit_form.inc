@@ -99,7 +99,7 @@ function signup_edit_form($form_state, $signup, $type) {
         $form['elements']['signup_form_data'][$pane_id] = array(
           '#tree' => TRUE,
         );
-        $form['elements']['signup_form_data'][$pane_id] += $callback($form_state, $node, $signup_type);
+        $form['elements']['signup_form_data'][$pane_id] += $callback($form_state, $node, $pane_id, $signup_type);
       }
     }
   }
