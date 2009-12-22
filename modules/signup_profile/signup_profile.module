@@ -91,7 +91,7 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   //   @todo: make this bit work for bonus points!
   // - $user is not looked at at all.
   $form = profile_form_profile(array(), NULL, $category, FALSE);
-
+  
   // Our data is not in the signup data, so we prepopulate this form
   // with our own default values where applicable.
   if (isset($signup_form['#signup']) && $signup_type != 'anon') {
@@ -112,6 +112,7 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
     foreach (element_children($form[$category]) as $key) {
       $form[$category][$key]['#default_value'] = $account->$key;
     }
+    $form[$category]['#description'] = t('This information is from your site profile; changes you make here will be saved into it.');
   }
     
   return $form;
