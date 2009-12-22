@@ -87,12 +87,19 @@ function signup_edit_form($form_state, $signup, $type) {
 
   // Build all the signup panes for this node.
   if (isset($node->signup_form_panes)) {
-    $custom_form = array();
+    $form['elements']['signup_form_data'] = array(
+      '#tree' => TRUE,
+    );
     $signup_form_data = module_invoke_all('signup_form_info');
     foreach (array_keys($node->signup_form_panes) as $pane_id) {
       if (isset($signup_form_data[$pane_id])) {
         $callback = $signup_form_data[$pane_id]['callback'];
-        $custom_form[$pane_id] = $callback($form_state, $node, $signup_type);
+        // Each pane goes into its own form element with #tree set
+        // to protect form values from clashing.
+        $form['elements']['signup_form_data'][$pane_id] = array(
+          '#tree' => TRUE,
+        );
+        $form['elements']['signup_form_data'][$pane_id] += $callback($form_state, $node, $signup_type);
       }
     }
   }
@@ -105,17 +112,17 @@ function signup_edit_form($form_state, $signup, $type) {
   // @todo: consider letting each module callback fill in its values
   foreach ($form_data as $pane_id => $pane_data) {
     foreach ($pane_data as $key => $value) {
-      if (!empty($custom_form[$pane_id][$key])) {
-        $custom_form[$pane_id][$key]['#default_value'] = $value;
+      if (!empty($form['elements']['signup_form_data'][$pane_id][$key])) {
+        $form['elements']['signup_form_data'][$pane_id][$key]['#default_value'] = $value;
         if (!$can_edit) {
           // If they can't edit, mark all the fields as disabled.
-          $custom_form['signup_form_data'][$key]['#disabled'] = TRUE;
+          // @todo @fixme no idea what this does, commenting out has no effect
+          // so how are the form elements getting greyed out if not by this?
+          $form['elements']['signup_form_data']['#disabled'] = TRUE;
         }
       }
     }
   }
-  
-  $form['elements'] += $custom_form;
 
   // Add the appropriate buttons based on permissions.
   if ($can_edit) {
