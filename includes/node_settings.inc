@@ -70,6 +70,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     '#type' => 'item',
     '#title' => t('Signup form panes'),
     '#tree' => TRUE,
+    '#description' => t('Enable the signup form panes you want to use on this signup. You may also drag enabled panes into any order. The position of disabled panes in the list is ignored.'),
     '#theme' => 'signup_node_settings_form_panes',
   );
   
