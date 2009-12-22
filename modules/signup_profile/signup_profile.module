@@ -74,6 +74,8 @@ function _signup_profile_available_categories() {
  *    'auth' -- regular authenticated user signup form
  *    'anon' -- anonymous user signup form (includes required email field).
  *    'admin' -- admin form to signup another user (includes user selector).
+ * @return
+ *   A form API array for insertion into the signup form. 
  */
 function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   global $user;
