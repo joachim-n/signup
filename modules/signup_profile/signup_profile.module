@@ -130,7 +130,7 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
  *
  * This allows us to alter the signup data prior to it being saved, do our own
  * saving of profile data, and remove the profile data from the signup so it is
- * not 
+ * not saved in the {signup_log} table's serialized array.
  */
 function signup_profile_signup_data_alter(&$signup, $form_values) {
   // BIG @TODO: what do we do if this is an anon???
