@@ -99,6 +99,7 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   // - $user is not looked at at all.
   $form = profile_form_profile(array(), NULL, $category, FALSE);
   
+  // @TODO: move this up to the caller and pass in $signup, $account.
   // Our data is not in the signup data, so we prepopulate this form
   // with our own default values where applicable.
   if (isset($signup_form['#signup']) && $signup_type != 'anon') {
