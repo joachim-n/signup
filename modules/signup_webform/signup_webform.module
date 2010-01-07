@@ -14,7 +14,10 @@
  *
  * @todo: use form_alter or nodeapi to disable the webform from the node view
  * so it cant be submitted there (but visible for checking)
- * @todo: delete webform submission when the signup is cancelled.
+ * @todo: figure out why an unpublished webform doesn't render its components
+ * and spoof this so admins can unpublish a signup webform to hide it.
+ * @todo: add a link to configure the webform from the signup admin
+ * @todo: change the sid storage so it's in a table and hence has views support potential.
  */
 
 /**
@@ -64,7 +67,6 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   // Get the real nid from the prefixed pane ID and thence the node.
   $webform_nid = substr($pane_id, 8);
   $webform_node = node_load($webform_nid);
-  // @todo check the node is still published -- don't show if not.
   
   module_load_include('inc', 'webform', 'webform_components');
   webform_load_components();
