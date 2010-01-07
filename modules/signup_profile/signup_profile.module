@@ -138,21 +138,30 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $pane_id, $sign
 function signup_profile_signup_data_alter(&$signup, $form_values) {
   // BIG @TODO: what do we do if this is an anon???
   
-  $account = user_load($signup->uid);
+  // Check we have incoming data that concerns us.
+  foreach($signup->form_data as $pane_id => $form_data_pane) {
+    if (substr($pane_id, 0, 7) == 'profile') {
+      $profile_pane_ids[] = $pane_id;
+    }
+  }
   
-  // actually, could just as easily go over ALL cats and just check isset which we need to do anyway. DOH
-  $categories = _signup_profile_available_categories();
-  foreach ($categories as $category) {
-    $category_name = $category['name']; // save on nested [] eyeache
-    $profile_data = $signup->form_data['profile_' . $category_name][$category_name];
+  if (isset($profile_pane_ids)) {
+    // Get the user account.
+    $account = user_load($signup->uid);
     
-    // Again, a bit hackish, but probably safe to call:
-    // function profile_save_profile(&$edit, &$user, $category, $register = FALSE)
-    // $edit is an array of form element ID => value which we have too.
-    // $user we pass the account for the signup.
-    profile_save_profile($profile_data, $account, $category_name, FALSE);
-    
-    // Unset our data from the signup so it's not saved redundantly.
-    unset($signup->form_data['profile_' . $category_name]);
+    foreach ($profile_pane_ids as $pane_id) {
+      // Get the real category name from the prefixed pane ID.
+      $category_name = substr($pane_id, 8);
+      $profile_data = $signup->form_data['profile_' . $category_name][$category_name];
+      
+      // Again, a bit hackish, but probably safe to call:
+      // function profile_save_profile(&$edit, &$user, $category, $register = FALSE)
+      // $edit is an array of form element ID => value which we have too.
+      // $user we pass the account for the signup.
+      profile_save_profile($profile_data, $account, $category_name, FALSE);
+      
+      // Unset our data from the signup so it's not saved redundantly.
+      unset($signup->form_data['profile_' . $category_name]);
+    }    
   }
 }
