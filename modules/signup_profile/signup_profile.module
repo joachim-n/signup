@@ -161,7 +161,7 @@ function signup_profile_signup_data_alter(&$signup, $form_values) {
       profile_save_profile($profile_data, $account, $category_name, FALSE);
       
       // Unset our data from the signup so it's not saved redundantly.
-      unset($signup->form_data['profile_' . $category_name]);
+      unset($signup->form_data[$pane_id]);
     }    
   }
 }
