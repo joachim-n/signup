@@ -60,11 +60,11 @@ function signup_webform_signup_pane_info() {
 function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   $form = array();
 
-  // Get the real nid from the prefixed pane ID.
-  $nid = substr($pane_id, 8);
+  // Get the real webform nid from the prefixed pane ID.
+  $webform_nid = substr($pane_id, 8);
   
   // @todo check the node is still published -- don't show if not.
-  $node = node_load(array('nid' => $nid));
+  $node = node_load($webform_nid);
   
   _signup_webform_translate_cid_form_keys($node);
   
@@ -160,10 +160,10 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
     foreach ($webform_pane_ids as $pane_id) {
 
       // Get the real nid from the prefixed pane ID.
-      $nid = substr($pane_id, 8);
+      $webform_nid = substr($pane_id, 8);
       
       // @todo check the node is still published -- don't show if not.
-      $node = node_load(array('nid' => $nid));
+      $node = node_load(array('nid' => $webform_nid));
             
       /*
       So... some missing documentation!
@@ -193,6 +193,8 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       foreach ($webform_data as $form_key => $component_data) {
         $cid = $component_lookup[$form_key];
         $submitted[$cid] = $component_data;
+        
+        // @TODO: should clean up enpty checkbox items? check what webform itself does.
       }
       webform_submission_insert($node, $submitted);
       
