@@ -149,74 +149,67 @@ function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  * Implementation of hook_signup_data_alter().
  */
 function signup_webform_signup_data_alter(&$signup, $form_values) {
-  // Check we have incoming data that concerns us
-  foreach($signup->form_data as $pane_id => $form_data_pane) {
-    if (substr($pane_id, 0, 7) == 'webform') {
-      $webform_pane_ids[] = $pane_id;
-    }
-  }
-  
-  if (isset($webform_pane_ids)) {
-    // Load the webform API.
+  // Act on each pane that is a webform pane.
+  foreach (_signup_webform_pane_ids($signup->form_data) as $pane_id) {
+    // Load the webform API. 
+    // Do this inside the loop so signups that don't use webform don't load this.
     module_load_include('inc', 'webform', 'webform_submissions');
-    foreach ($webform_pane_ids as $pane_id) {
-
-      // Get the real nid from the prefixed pane ID and thence the node.
-      $webform_nid = substr($pane_id, 8);
-      $webform_node = node_load($webform_nid);
-            
-      /*
-      So... some missing documentation!
-      webform_submission_insert($node, $submitted)
-      expects this for $submitted, where keys are cids:
-      *   Array
-      *  (
-      *      [1] => Array // Single checkbox TRUE/FALSE
-      *          (
-      *              [1] => 1 
-      *          )
-      *  
-      *      [2] => Abbey Road // Textfield
-      *      [3] => Array // Multiple select: checkboxes
-      *          (
-      *              [John] => John
-      *              [Paul] => Paul
-      *          )
-      *  
-      *  )
-      *
-      */
-      $component_lookup = _signup_webform_translate_cid_form_keys($webform_node);
-      
-      $submitted = array();
-      $webform_data = $signup->form_data[$pane_id];
-      foreach ($webform_data as $form_key => $component_data) {
-        $cid = $component_lookup[$form_key];
-        // Remove 0 values for unselected checkbox items
-        if (is_array($component_data)) {
-          $component_data = array_filter($component_data);
-        }
-        
-        $submitted[$cid] = $component_data;
+    
+    // Get the real nid from the prefixed pane ID and thence the node.
+    $webform_nid = substr($pane_id, 8);
+    $webform_node = node_load($webform_nid);
+          
+    /*
+    So... some missing documentation!
+    webform_submission_insert($node, $submitted)
+    expects this for $submitted, where keys are cids:
+    *   Array
+    *  (
+    *      [1] => Array // Single checkbox TRUE/FALSE
+    *          (
+    *              [1] => 1 
+    *          )
+    *  
+    *      [2] => Abbey Road // Textfield
+    *      [3] => Array // Multiple select: checkboxes
+    *          (
+    *              [John] => John
+    *              [Paul] => Paul
+    *          )
+    *  
+    *  )
+    *
+    */
+    $component_lookup = _signup_webform_translate_cid_form_keys($webform_node);
+    
+    $submitted = array();
+    $webform_data = $signup->form_data[$pane_id];
+    foreach ($webform_data as $form_key => $component_data) {
+      $cid = $component_lookup[$form_key];
+      // Remove 0 values for unselected checkbox items
+      if (is_array($component_data)) {
+        $component_data = array_filter($component_data);
       }
       
-      if (isset($signup->sid)) {
-        // existing signup: update rather than insert.
-        $submission_sid = db_result(db_query('SELECT submission_sid FROM {signup_webform_submission} WHERE signup_sid = %d AND webform_nid = %d', $signup->sid, $webform_nid));
-        webform_submission_update($webform_node, $submission_sid, $submitted);
-      }
-      else {
-        // new signup: insert webform submission.
-        $sid = webform_submission_insert($webform_node, $submitted);
-        
-        // Replace our data with just the submission ID; this is retrieved
-        // by signup_webform_signup_insert() once the signup is saved and has 
-        // an ID.
-        $signup->form_data[$pane_id] = array(
-          'sid' => $sid,
-        );
-      }
-    }   
+      $submitted[$cid] = $component_data;
+    }
+    
+    if (isset($signup->sid)) {
+      // existing signup: update rather than insert.
+      $submission_sid = db_result(db_query('SELECT submission_sid FROM {signup_webform_submission} WHERE signup_sid = %d AND webform_nid = %d', $signup->sid, $webform_nid));
+      webform_submission_update($webform_node, $submission_sid, $submitted);
+    }
+    else {
+      // new signup: insert webform submission.
+      $sid = webform_submission_insert($webform_node, $submitted);
+      
+      // Replace our data with just the submission ID; this is retrieved
+      // by signup_webform_signup_insert() once the signup is saved and has 
+      // an ID.
+      $signup->form_data[$pane_id] = array(
+        'sid' => $sid,
+      );
+    }
   }
 }
 
@@ -229,21 +222,11 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
  * at that point there is no signup id.
  */
 function signup_webform_signup_insert($signup) {
-  // Check we have incoming data that concerns us
-  // @todo: farm this bit out to a function, same pattern as element_children.
-  foreach($signup->form_data as $pane_id => $form_data_pane) {
-    if (substr($pane_id, 0, 7) == 'webform') {
-      $webform_pane_ids[] = $pane_id;
-    }
-  }
-  
-  if (isset($webform_pane_ids)) {
-    foreach ($webform_pane_ids as $pane_id) {
-      // Retrieve the Submission id where we put it in the form data.
-      $submission_sid = $signup->form_data[$pane_id]['sid'];
-      $webform_nid = substr($pane_id, 8);
-      db_query("INSERT INTO {signup_webform_submission} (signup_sid, webform_nid, submission_sid) VALUES (%d, %d, %d)", $signup->sid, $webform_nid, $submission_sid);
-    }
+  foreach (_signup_webform_pane_ids($signup->form_data) as $pane_id) {
+    // Retrieve the Submission id where we put it in the form data.
+    $submission_sid = $signup->form_data[$pane_id]['sid'];
+    $webform_nid = substr($pane_id, 8);
+    db_query("INSERT INTO {signup_webform_submission} (signup_sid, webform_nid, submission_sid) VALUES (%d, %d, %d)", $signup->sid, $webform_nid, $submission_sid);
   }
 }
 
@@ -256,31 +239,23 @@ function signup_webform_signup_cancel($signup, $node) {
   // We appear to come here unserialized; is this a bug? @todo
   $form_data = unserialize($signup->form_data);
   
-  // Check we have incoming data that concerns us
-  foreach($form_data as $pane_id => $form_data_pane) {
-    if (substr($pane_id, 0, 7) == 'webform') {
-      $webform_pane_ids[] = $pane_id;
-    }
-  }
-  
-  if (isset($webform_pane_ids)) {
+  foreach (_signup_webform_pane_ids($form_data) as $pane_id) {
     // Load the webform API.
     module_load_include('inc', 'webform', 'webform_submissions');
-    foreach ($webform_pane_ids as $pane_id) {
-      // Get the real nid from the prefixed pane ID and thence the node.
-      $webform_nid = substr($pane_id, 8);
-      $webform_node = node_load($webform_nid);
-      
-      // Get the submission ID from the signup data and thence the submission.
-      $sid = $form_data[$pane_id]['sid'];
-      $submission = webform_get_submission($webform_nid, $sid);
-      
-      // Delete the webform submission.
-      webform_submission_delete($webform_node, $submission);
-      // Delete the signup-webform submission relationship.
-      db_query("DELETE FROM {signup_webform_submission} WHERE signup_sid = %d", $signup->sid);          
-    }
-  }  
+    
+    // Get the real nid from the prefixed pane ID and thence the node.
+    $webform_nid = substr($pane_id, 8);
+    $webform_node = node_load($webform_nid);
+    
+    // Get the submission ID from the signup data and thence the submission.
+    $sid = $form_data[$pane_id]['sid'];
+    $submission = webform_get_submission($webform_nid, $sid);
+    
+    // Delete the webform submission.
+    webform_submission_delete($webform_node, $submission);
+    // Delete the signup-webform submission relationship.
+    db_query("DELETE FROM {signup_webform_submission} WHERE signup_sid = %d", $signup->sid);          
+  }
 }
 
 /**
@@ -314,4 +289,24 @@ function _signup_webform_translate_cid_form_keys($webform_node) {
     $data[$component['form_key']] = $component['cid'];
   }
   return $data;
+}
+
+/**
+ * Helper function to get the webform panes from an array on pane IDs.
+ * 
+ * Same pattern as element_children().
+ *
+ * @param $signup_data
+ *  An array whose keys are pane IDs. Probably $signup->form_data.
+ * @return
+ *  An array of the keys that are IDs for webform panes.
+ */
+function _signup_webform_pane_ids($signup_data) {
+  $return = array();
+  foreach($signup_data as $pane_id => $data) {
+    if (substr($pane_id, 0, 7) == 'webform') {
+      $return[] = $pane_id;
+    }
+  }
+  return $return;
 }
