@@ -192,9 +192,15 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       $webform_data = $signup->form_data[$pane_id];
       foreach ($webform_data as $form_key => $component_data) {
         $cid = $component_lookup[$form_key];
-        $submitted[$cid] = $component_data;
+        // @TODO: clean up empty checkbox items.
+        /*
+        // Remove 0 values for unselected checkbox items
+        if (is_array($component_data)) {
+          $component_data = array_filter($component_data);
+        }
+        */
         
-        // @TODO: should clean up enpty checkbox items? check what webform itself does.
+        $submitted[$cid] = $component_data;
       }
       webform_submission_insert($node, $submitted);
       
