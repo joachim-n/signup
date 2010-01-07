@@ -14,6 +14,7 @@
  *
  * @todo: use form_alter or nodeapi to disable the webform from the node view
  * so it cant be submitted there (but visible for checking)
+ * @todo: delete webform submission when the signup is cancelled.
  */
 
 /**
@@ -192,13 +193,10 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       $webform_data = $signup->form_data[$pane_id];
       foreach ($webform_data as $form_key => $component_data) {
         $cid = $component_lookup[$form_key];
-        // @TODO: clean up empty checkbox items.
-        /*
         // Remove 0 values for unselected checkbox items
         if (is_array($component_data)) {
           $component_data = array_filter($component_data);
         }
-        */
         
         $submitted[$cid] = $component_data;
       }
