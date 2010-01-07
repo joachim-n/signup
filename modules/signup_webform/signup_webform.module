@@ -128,23 +128,6 @@ function Xsignup_webform_menu() {
   return $items;
 }
 
-
-/**
- * Implementation of hook_nodeapi().
- */
-function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  switch ($op) {
-    case 'delete':
-      // @todo
-      // delete webform submissions link data
-      // delete webform submissions?
-      // Clean up the signup tables for the deleted node.
-      //db_query("DELETE FROM {signup_webform_submission} WHERE ....); // do we still even have the data we need here?
-      break;
-  }
-}
-
-
 /**
  * Implementation of hook_signup_data_alter().
  */
@@ -233,7 +216,7 @@ function signup_webform_signup_insert($signup) {
 /**
  * Implementation of hook_signup_cancel().
  *
- * Delete corresponding webform submission when a signup is deleted.
+ * When a signup is canceled, delete the corresponding webform submission.
  */
 function signup_webform_signup_cancel($signup, $node) {
   // We appear to come here unserialized; is this a bug? @todo
@@ -255,6 +238,24 @@ function signup_webform_signup_cancel($signup, $node) {
     webform_submission_delete($webform_node, $submission);
     // Delete the signup-webform submission relationship.
     db_query("DELETE FROM {signup_webform_submission} WHERE signup_sid = %d", $signup->sid);          
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * When a whole signup node is deleted, delete data related to it.
+ */
+function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'delete' && isset($node->signup_form_panes)) {
+    // Clean up the webform submissions table for the deleted node.
+    $webform_pane_ids = _signup_webform_pane_ids($node->signup_form_panes);
+    // We need to delete for each webform that this signup may be linked to.
+    foreach (_signup_webform_pane_ids($node->signup_form_panes) as $pane_id) {
+      $webform_nid = substr($pane_id, 8);
+      db_query('DELETE FROM {signup_webform_submission} WHERE webform_nid = %d', $webform_nid);
+    }
+    // @todo delete webform submissions too.
   }
 }
 
