@@ -17,8 +17,8 @@
  * @todo: figure out why an unpublished webform doesn't render its components
  * and spoof this so admins can unpublish a signup webform to hide it.
  * @todo: add a link to configure the webform from the signup admin
- * @todo: change the sid storage so it's in a table and hence has views support potential.
  * @todo: hook_nodeapi: delete: delete ALL stuff for this node!
+ * @todo: use hook_form_alter to prevent deletion of webform nodes whose panes are used? or at least warn.
  */
 
 /**
@@ -136,10 +136,10 @@ function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op) {
     case 'delete':
       // @todo
-      // remove webform panes?
       // delete webform submissions link data
       // delete webform submissions?
-      
+      // Clean up the signup tables for the deleted node.
+      //db_query("DELETE FROM {signup_webform_submission} WHERE ....); // do we still even have the data we need here?
       break;
   }
 }
