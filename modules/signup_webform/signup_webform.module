@@ -61,13 +61,12 @@ function signup_webform_signup_pane_info() {
 function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
   $form = array();
 
-  // Get the real webform nid from the prefixed pane ID.
+  // Get the real nid from the prefixed pane ID and thence the node.
   $webform_nid = substr($pane_id, 8);
-  
+  $webform_node = node_load($webform_nid);
   // @todo check the node is still published -- don't show if not.
-  $node = node_load($webform_nid);
   
-  _signup_webform_translate_cid_form_keys($node);
+  _signup_webform_translate_cid_form_keys($webform_node);
   
   module_load_include('inc', 'webform', 'webform_components');
   webform_load_components();
@@ -75,7 +74,7 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   $component_tree = array();
   $page_count = 1;
   $page_num = 1;
-  _webform_components_tree_build($node->webform['components'], $component_tree, 0, $page_count);
+  _webform_components_tree_build($webform_node->webform['components'], $component_tree, 0, $page_count);
   
   //dsm($component_tree);
 
@@ -156,15 +155,13 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
   }
   
   if (isset($webform_pane_ids)) {
+    // Load the webform API.
     module_load_include('inc', 'webform', 'webform_submissions');
-
     foreach ($webform_pane_ids as $pane_id) {
 
-      // Get the real nid from the prefixed pane ID.
+      // Get the real nid from the prefixed pane ID and thence the node.
       $webform_nid = substr($pane_id, 8);
-      
-      // @todo check the node is still published -- don't show if not.
-      $node = node_load(array('nid' => $webform_nid));
+      $webform_node = node_load($webform_nid);
             
       /*
       So... some missing documentation!
@@ -187,7 +184,7 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       *  )
       *
       */
-      $component_lookup = _signup_webform_translate_cid_form_keys($node);
+      $component_lookup = _signup_webform_translate_cid_form_keys($webform_node);
       
       $submitted = array();
       $webform_data = $signup->form_data[$pane_id];
@@ -200,7 +197,7 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
         
         $submitted[$cid] = $component_data;
       }
-      $sid = webform_submission_insert($node, $submitted);
+      $sid = webform_submission_insert($webform_node, $submitted);
       
       // Replace our data with just the submission ID: we need to have this to
       // retrieve webform data for anon signups.
@@ -233,7 +230,7 @@ function signup_webform_signup_cancel($signup, $node) {
     foreach ($webform_pane_ids as $pane_id) {
       // Get the real nid from the prefixed pane ID and thence the node.
       $webform_nid = substr($pane_id, 8);
-      $webform_node = node_load(array('nid' => $webform_nid));
+      $webform_node = node_load($webform_nid);
       
       // Get the submission ID from the signup data and thence the submission.
       $sid = $form_data[$pane_id]['sid'];
@@ -247,11 +244,11 @@ function signup_webform_signup_cancel($signup, $node) {
 /**
  * Helper function to make a lookup array of form keys => cid.
  * 
- * @param $node
+ * @param $webform_node
  *  Just feed this the entire webform $node object. 
  */
-function _signup_webform_translate_cid_form_keys($node) {
-  $components = $node->webform['components'];
+function _signup_webform_translate_cid_form_keys($webform_node) {
+  $components = $webform_node->webform['components'];
   foreach ($components as $component) {
     $data[$component['form_key']] = $component['cid'];
   }
