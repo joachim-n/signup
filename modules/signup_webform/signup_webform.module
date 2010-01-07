@@ -18,6 +18,7 @@
  * and spoof this so admins can unpublish a signup webform to hide it.
  * @todo: add a link to configure the webform from the signup admin
  * @todo: change the sid storage so it's in a table and hence has views support potential.
+ * @todo: hook_nodeapi: delete: delete ALL stuff for this node!
  */
 
 /**
@@ -75,11 +76,7 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   // takes care of putting in existing data.
   if (isset($signup_form['#signup']) && $signup_type != 'anon') {
     $signup = $signup_form['#signup'];
-    $signup_form_data = unserialize($signup->form_data);
-    $sid = $signup_form_data[$pane_id]['sid'];
-    // Load the webform API.
-    module_load_include('inc', 'webform', 'webform_submissions');
-    $submission = webform_get_submission($webform_nid, $sid);
+    $submission = signup_webform_get_signup_submission($signup, $webform_nid);
   }  
   
   $component_tree = array();
@@ -137,16 +134,12 @@ function Xsignup_webform_menu() {
  */
 function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op) {
-    case 'alter':
-      // dunno.
-      // OPTIONAL: the $node->content array has been rendered, so the node body or
-      // teaser is filtered and now contains HTML. This op should only be used when
-      // text substitution, filtering, or other raw text operations are necessary.
-      break;
     case 'delete':
-      // remove webform panes
+      // @todo
+      // remove webform panes?
+      // delete webform submissions link data
+      // delete webform submissions?
       
-      // OPTIONAL: The node is being deleted.
       break;
   }
 }
@@ -208,12 +201,40 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       }
       $sid = webform_submission_insert($webform_node, $submitted);
       
-      // Replace our data with just the submission ID: we need to have this to
-      // retrieve webform data for anon signups.
+      // Replace our data with just the submission ID; this is retrieved
+      // by signup_webform_signup_insert() once the signup is saved and has 
+      // an ID.
       $signup->form_data[$pane_id] = array(
         'sid' => $sid,
       );
     }   
+  }
+}
+
+/**
+ * Implementation of hook_signup_insert().
+ *
+ * Carries on from signup_webform_signup_data_alter(). Saves the relationship
+ * between the signup and the webform submission into {signup_webform_submission},
+ * which we couldn't do earlier in signup_webform_signup_data_alter() because
+ * at that point there is no signup id.
+ */
+function signup_webform_signup_insert($signup) {
+  // Check we have incoming data that concerns us
+  // @todo: farm this bit out to a function, same pattern as element_children.
+  foreach($signup->form_data as $pane_id => $form_data_pane) {
+    if (substr($pane_id, 0, 7) == 'webform') {
+      $webform_pane_ids[] = $pane_id;
+    }
+  }
+  
+  if (isset($webform_pane_ids)) {
+    foreach ($webform_pane_ids as $pane_id) {
+      // Retrieve the Submission id where we put it in the form data.
+      $submission_sid = $signup->form_data[$pane_id]['sid'];
+      $webform_nid = substr($pane_id, 8);
+      db_query("INSERT INTO {signup_webform_submission} (signup_sid, webform_nid, submission_sid) VALUES (%d, %d, %d)", $signup->sid, $webform_nid, $submission_sid);
+    }
   }
 }
 
@@ -245,9 +266,31 @@ function signup_webform_signup_cancel($signup, $node) {
       $sid = $form_data[$pane_id]['sid'];
       $submission = webform_get_submission($webform_nid, $sid);
       
+      // Delete the webform submission.
       webform_submission_delete($webform_node, $submission);
+      // Delete the signup-webform submission relationship.
+      db_query("DELETE FROM {signup_webform_submission} WHERE signup_sid = %d", $signup->sid);          
     }
   }  
+}
+
+/**
+ * Get the webform submission record for a given signup record.
+ *
+ * @param $signup
+ *  The signup record object, as generally swilled around the place. 
+ * @param $webform_nid
+ *  The node ID of the webform node in question.
+ * @return
+ *  A webform submission object, as returned by webform_get_submission().
+ */
+function signup_webform_get_signup_submission($signup, $webform_nid) {
+  // Beware: both pieces of data we care about here are called sid!
+  $submission_sid = db_result(db_query('SELECT submission_sid FROM {signup_webform_submission} WHERE signup_sid = %d AND webform_nid = %d', $signup->sid, $webform_nid));
+  // Load the webform API.
+  module_load_include('inc', 'webform', 'webform_submissions');
+  $submission = webform_get_submission($webform_nid, $submission_sid);
+  return $submission;
 }
 
 /**
