@@ -200,12 +200,48 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
         
         $submitted[$cid] = $component_data;
       }
-      webform_submission_insert($node, $submitted);
+      $sid = webform_submission_insert($node, $submitted);
       
-      // Unset our data from the signup so it's not saved redundantly.
-      unset($signup->form_data[$pane_id]);
+      // Replace our data with just the submission ID: we need to have this to
+      // retrieve webform data for anon signups.
+      $signup->form_data[$pane_id] = array(
+        'sid' => $sid,
+      );
     }   
   }
+}
+
+/**
+ * Implementation of hook_signup_cancel().
+ *
+ * Delete corresponding webform submission when a signup is deleted.
+ */
+function signup_webform_signup_cancel($signup, $node) {
+  // We appear to come here unserialized; is this a bug? @todo
+  $form_data = unserialize($signup->form_data);
+  
+  // Check we have incoming data that concerns us
+  foreach($form_data as $pane_id => $form_data_pane) {
+    if (substr($pane_id, 0, 7) == 'webform') {
+      $webform_pane_ids[] = $pane_id;
+    }
+  }
+  
+  if (isset($webform_pane_ids)) {
+    // Load the webform API.
+    module_load_include('inc', 'webform', 'webform_submissions');
+    foreach ($webform_pane_ids as $pane_id) {
+      // Get the real nid from the prefixed pane ID and thence the node.
+      $webform_nid = substr($pane_id, 8);
+      $webform_node = node_load(array('nid' => $webform_nid));
+      
+      // Get the submission ID from the signup data and thence the submission.
+      $sid = $form_data[$pane_id]['sid'];
+      $submission = webform_get_submission($webform_nid, $sid);
+      
+      webform_submission_delete($webform_node, $submission);
+    }
+  }  
 }
 
 /**
