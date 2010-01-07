@@ -22,7 +22,7 @@ function signup_profile_signup_pane_info() {
       // Make a pane for each category.
       $panes['profile_' . $category['name']] = array(
         'label' => 'Profile: ' . $category['name'],
-        'description' => t('Collects @category profile fields.', array('@category' => $category['name'])),
+        'description' => t('Collects @category profile fields and saves to the user profile.', array('@category' => $category['name'])),
         'callback' => 'signup_profile_form',
       );
     }
