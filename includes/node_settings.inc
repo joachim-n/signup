@@ -277,6 +277,10 @@ function signup_node_settings_form_submit($form, &$form_state) {
     if (count($signup_panes)) {
       // Give a singleton pane a weight value, arbitrarily set to 0.
       if (count($signup_panes) == 1) {
+        // Convoluted way of getting the first (and only!) key to set the value to 0
+        // @todo Suggestions for improvement welcome!
+        reset($signup_panes);
+        $pane_id = key($signup_panes);
         $signup_panes[$pane_id] = 0;
       }
       // Sort by weight, preserve keys.
