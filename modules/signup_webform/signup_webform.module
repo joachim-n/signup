@@ -1,0 +1,217 @@
+<?php
+// $Id$
+/**
+ * @file signup_webform.module
+ * 
+ * Signup integration with webform module.
+ *
+ * A pane is provided for each webform node.
+ * The intention is that if a webform is used for signup, it is *not* also 
+ * used as a standalone webform; rather, we make use of webform for its
+ * convenience in allowing users to build a form with a UI.
+ * Also note that parenting, fieldsets, and pagebreaks are untested, unsupported,
+ * and probably won't work! @todo: add some checking for this.
+ *
+ * @todo: use form_alter or nodeapi to disable the webform from the node view
+ * so it cant be submitted there (but visible for checking)
+ */
+
+/**
+ * Implementation of hook_signup_pane_info().
+ *
+ * This should return an associative array of data about signup form panes.
+ */
+function signup_webform_signup_pane_info() {
+  // Get the webform nodes.
+  $result = db_query('SELECT n.title, n.nid FROM {node} n WHERE n.type = "webform" AND n.status = 1');
+  while ($webform = db_fetch_object($result)) {
+    $panes['webform_' . $webform->nid] = array(
+      'label' => 'Webform: ' . $webform->title,
+      'description' => t('Collects data for the webform.'),
+      'callback' => 'signup_webform_form',
+    );
+  }
+  
+  return $panes;
+}
+
+/**
+ * Signup form pane callback.
+ *
+ * @param &$signup_form
+ *   The form array for the whole signup. You should not alter this, but it
+ *   contains useful data depending on circumstances, such as the signup 
+ *   object (in $form['#signup']) when an existing signup is being edited.
+ * @param &$form_state
+ *   Likewise.
+ * @param $node
+ *   The fully loaded node object.
+ * @param $pane_id
+ *   The pane ID being invoked. This allows a module to implement multiple panes
+ *   with one callback.
+ * @param $signup_type
+ *   Determines what kind of signup to generate a form for. Possible values:
+ *    'auth' -- regular authenticated user signup form
+ *    'anon' -- anonymous user signup form (includes required email field).
+ *    'admin' -- admin form to signup another user (includes user selector).
+ * @return
+ *   A form API array for insertion into the signup form. 
+ */
+function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
+  $form = array();
+
+  // Get the real nid from the prefixed pane ID.
+  $nid = substr($pane_id, 8);
+  
+  // @todo check the node is still published -- don't show if not.
+  $node = node_load(array('nid' => $nid));
+  
+  _signup_webform_translate_cid_form_keys($node);
+  
+  module_load_include('inc', 'webform', 'webform_components');
+  webform_load_components();
+  
+  $component_tree = array();
+  $page_count = 1;
+  $page_num = 1;
+  _webform_components_tree_build($node->webform['components'], $component_tree, 0, $page_count);
+  
+  //dsm($component_tree);
+
+  // Recursively add components to the form. Microweights keep things in webform order.
+  // No idea what most of these do; _webform_client_form_add_component() is an undocumented black box!
+  $microweight = 0.001;
+  $enabled = TRUE;
+  foreach ($component_tree['children'] as $cid => $component) {
+    // we have no existing values here ever.
+    $component_value = NULL;
+    _webform_client_form_add_component($cid, $component, $component_value, $form, $form, $submission, $page_num, $enabled);
+  }
+  
+  // @todo: put in values from exiting submission
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function Xsignup_webform_menu() { 
+  // This is the minimum information you can provide for a menu item.
+  $items['TODO: Enter path'] = array(
+    'title' => 'TODO: Enter menu item title',
+    'page callback' => 'TODO: Enter callback function',
+    'access arguments' => array('TODO: Enter user permissions'),
+  );
+  // more complex menu item
+  $items['TODO: Enter path'] = array(
+    'title' => 'TODO: Enter menu item title',
+    'description' => 'TODO: Enter description',
+    'page callback' => 'TODO: Enter callback function',
+    'page arguments' => '', // An array of arguments to pass to the page callback function. Integer values pass the corresponding URL component.
+    'access callback' => '', // defaults to user_access()
+    'access arguments' => array('TODO: Enter user permissions'),
+    'weight' => 0,
+    'type' => MENU_NORMAL_ITEM, // One of MENU_NORMAL_ITEM / MENU_CALLBACK / MENU_SUGGESTED_ITEM / MENU_LOCAL_TASK / MENU_DEFAULT_LOCAL_TASK
+    'menu_name' => '', // Menu to place this item in.
+    'title callback' => '', // Function to generate the title, defaults to t(). 
+    'title arguments' => '', // Arguments to send to t() or your custom callback. 
+  );
+  // OPTIONAL: Fill in additional static menu items
+
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'alter':
+      // dunno.
+      // OPTIONAL: the $node->content array has been rendered, so the node body or
+      // teaser is filtered and now contains HTML. This op should only be used when
+      // text substitution, filtering, or other raw text operations are necessary.
+      break;
+    case 'delete':
+      // remove webform panes
+      
+      // OPTIONAL: The node is being deleted.
+      break;
+  }
+}
+
+
+/**
+ * Implementation of hook_signup_data_alter().
+ */
+function signup_webform_signup_data_alter(&$signup, $form_values) {
+  // Check we have incoming data that concerns us
+  foreach($signup->form_data as $pane_id => $form_data_pane) {
+    if (substr($pane_id, 0, 7) == 'webform') {
+      $webform_pane_ids[] = $pane_id;
+    }
+  }
+  
+  if (isset($webform_pane_ids)) {
+    module_load_include('inc', 'webform', 'webform_submissions');
+
+    foreach ($webform_pane_ids as $pane_id) {
+
+      // Get the real nid from the prefixed pane ID.
+      $nid = substr($pane_id, 8);
+      
+      // @todo check the node is still published -- don't show if not.
+      $node = node_load(array('nid' => $nid));
+            
+      /*
+      So... some missing documentation!
+      webform_submission_insert($node, $submitted)
+      expects this for $submitted, where keys are cids:
+      *   Array
+      *  (
+      *      [1] => Array // Single checkbox TRUE/FALSE
+      *          (
+      *              [1] => 1 
+      *          )
+      *  
+      *      [2] => Abbey Road // Textfield
+      *      [3] => Array // Multiple select: checkboxes
+      *          (
+      *              [John] => John
+      *              [Paul] => Paul
+      *          )
+      *  
+      *  )
+      *
+      */
+      $component_lookup = _signup_webform_translate_cid_form_keys($node);
+      
+      $submitted = array();
+      $webform_data = $signup->form_data[$pane_id];
+      foreach ($webform_data as $form_key => $component_data) {
+        $cid = $component_lookup[$form_key];
+        $submitted[$cid] = $component_data;
+      }
+      webform_submission_insert($node, $submitted);
+      
+      // Unset our data from the signup so it's not saved redundantly.
+      unset($signup->form_data[$pane_id]);
+    }   
+  }
+}
+
+/**
+ * Helper function to make a lookup array of form keys => cid.
+ * 
+ * @param $node
+ *  Just feed this the entire webform $node object. 
+ */
+function _signup_webform_translate_cid_form_keys($node) {
+  $components = $node->webform['components'];
+  foreach ($components as $component) {
+    $data[$component['form_key']] = $component['cid'];
+  }
+  return $data;
+}
