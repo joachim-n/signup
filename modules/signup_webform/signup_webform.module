@@ -66,10 +66,19 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $sign
   $webform_node = node_load($webform_nid);
   // @todo check the node is still published -- don't show if not.
   
-  _signup_webform_translate_cid_form_keys($webform_node);
-  
   module_load_include('inc', 'webform', 'webform_components');
   webform_load_components();
+  
+  // Load the webform submission for existing signups, so the webform API
+  // takes care of putting in existing data.
+  if (isset($signup_form['#signup']) && $signup_type != 'anon') {
+    $signup = $signup_form['#signup'];
+    $signup_form_data = unserialize($signup->form_data);
+    $sid = $signup_form_data[$pane_id]['sid'];
+    // Load the webform API.
+    module_load_include('inc', 'webform', 'webform_submissions');
+    $submission = webform_get_submission($webform_nid, $sid);
+  }  
   
   $component_tree = array();
   $page_count = 1;
@@ -87,9 +96,7 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $sign
     $component_value = NULL;
     _webform_client_form_add_component($cid, $component, $component_value, $form, $form, $submission, $page_num, $enabled);
   }
-  
-  // @todo: put in values from exiting submission
-
+    
   return $form;
 }
 
