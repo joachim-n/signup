@@ -245,22 +245,39 @@ function signup_webform_signup_cancel($signup, $node) {
  *
  * When a whole signup node is deleted, delete data related to it.
  */
+/* 
+// needs work.
 function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'delete' && isset($node->signup_form_panes)) {
-    // Clean up the webform submissions table for the deleted node.
-    $webform_pane_ids = _signup_webform_pane_ids($node->signup_form_panes);
-    // We need to delete for each webform that this signup may be linked to.
+    $signup_nid = $node->nid;
+    // Act on records pertaining to each webform that this signup is linked to.
     foreach (_signup_webform_pane_ids($node->signup_form_panes) as $pane_id) {
+      // Load the webform API.
+      module_load_include('inc', 'webform', 'webform_submissions');
+      
       $webform_nid = substr($pane_id, 8);
-      db_query('DELETE FROM {signup_webform_submission} WHERE webform_nid = %d', $webform_nid);
+      $webform_node = node_load($webform_nid);
+      
+      // One webform may be used in several signup nodes. So we need to get 
+      // *only* the webform submissions that came from the signup node being deleted.
+      // @todo BUG!!! this doesn't seem to work at all!
+      // do we even have {signup_log} any more at this point?? 
+      // may be module weight issues here -- urgh!
+      $result = db_query('SELECT sws.submission_sid FROM {signup_log} sl INNER JOIN {signup_webform_submission} sws ON sl.sid = sws.signup_sid WHERE sl.nid = %d', $signup_nid);
+      // Act on each submission.
+      while ($submission_data = db_fetch_array($result)) {
+        // Load the submission in order to delete it... 
+        $submission = webform_get_submission($webform_nid, $submission_data['sid']);
+        webform_submission_delete($webform_node, $submission);
+        // Delete the signup-submission link for this submission.
+        // @todo: replace this with a DELETE SELECT query outside this loop, joining
+        // to {signup_log} if possible.
+        db_query('DELETE FROM {signup_webform_submission} WHERE submission_sid = %d', $submission_data['sid']);
+      }
     }
-    // @todo delete webform submissions too. urgh, this means loading ALL the submissions first:
-    // foreach $webform_nid, get the {signup_webform_submission}.submission_sids
-    // for ALL these submission sids, LOAD the damn submission
-    // then delete it
-    // THEN delete from {signup_webform_submission}.
   }
 }
+*/
 
 /**
  * Implementation of hook_form_FORM_ID_alter().
