@@ -76,8 +76,7 @@ function signup_webform_form(&$signup_form, &$form_state, $node, $signup, $pane_
   
   // Load the webform submission for existing signups, so the webform API
   // takes care of putting in existing data.
-  if (isset($signup_form['#signup']) && $signup_type != 'anon') {
-    $signup = $signup_form['#signup'];
+  if (isset($signup) && $signup_type != 'anon') {
     $submission = signup_webform_get_signup_submission($signup, $webform_nid);
   }  
   
