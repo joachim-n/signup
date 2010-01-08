@@ -13,9 +13,9 @@
  * and probably won't work! @todo: add some checking for this.
  *
  * @todo: use form_alter or nodeapi to disable the webform from the node view
- * so it cant be submitted there (but visible for checking)
+ *   so it cant be submitted there (but visible for checking)
  * @todo: figure out why an unpublished webform doesn't render its components
- * and spoof this so admins can unpublish a signup webform to hide it.
+ *   and spoof this so admins can unpublish a signup webform to hide it.
  * @todo: hook_nodeapi: delete: delete ALL stuff for this node!
  */
 
