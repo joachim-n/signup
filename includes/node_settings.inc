@@ -266,6 +266,8 @@ function signup_node_settings_form_submit($form, &$form_state) {
   }
   else {
     // Handle the pane settings.
+    // WTF new nodes come here with ALL WEIGHTS set at 10???
+    // @todo: new nodes probably need arbitrary weights setting?
     foreach ($form_state['values']['signup_form_panes'] as $pane_id => $form_state_values_panes) {
       if ($form_state_values_panes['enabled']) {
         $signup_panes[$pane_id] = $form_state_values_panes['weight'];
