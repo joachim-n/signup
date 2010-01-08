@@ -50,6 +50,9 @@ function signup_webform_signup_pane_info() {
  *   Likewise.
  * @param $node
  *   The fully loaded node object.
+ * @param $signup
+ *   If this is an existing signup, the fully loaded node object. If this is a 
+ *   new signup, this is just NULL.
  * @param $pane_id
  *   The pane ID being invoked. This allows a module to implement multiple panes
  *   with one callback.
@@ -61,7 +64,7 @@ function signup_webform_signup_pane_info() {
  * @return
  *   A form API array for insertion into the signup form. 
  */
-function signup_webform_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_webform_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
   $form = array();
 
   // Get the real nid from the prefixed pane ID and thence the node.

@@ -20,11 +20,12 @@
  *    - description: A longer description for the admin UI.
  *    - callback: A callback function to generate the form.
  *  The callback function should have the following signature:
- *   function my_callback(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth')
+ *   function my_callback(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth')
  *  where the parameters are:
  *  - $signup_form: Incoming form array, for information only.
  *  - $form_state: Incoming array from the form builder function.
  *  - $node: The fully loaded node object.
+ *  - $signup: The fully loaded signup object; or NULL if this is a new signup.
  *  - $pane_id: The id of the pane currently being invoked. This allows a module
  *    to use one callback for several panes.
  *  - $signup_type: The type of signup, which may influence what form is returned:
@@ -51,7 +52,7 @@ function signup_basic_form_signup_pane_info() {
 /**
  * Silly example just here for testing!
  */
-function signup_basic_form_silly(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_basic_form_silly(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
   $form['favorite_color'] = array(
     '#type' => 'textfield',
     '#title' => t('Favourite colour'),
@@ -72,6 +73,9 @@ function signup_basic_form_silly(&$signup_form, &$form_state, $node, $pane_id, $
  *   Likewise. You might need this, but you probably don't.
  * @param $node
  *   The fully loaded node object.
+ * @param $signup
+ *   If this is an existing signup, the fully loaded node object. If this is a 
+ *   new signup, this is just NULL.
  * @param $pane_id
  *   The pane ID being invoked. This allows a module to implement multiple panes
  *   with one callback.
@@ -83,7 +87,7 @@ function signup_basic_form_silly(&$signup_form, &$form_state, $node, $pane_id, $
  * @return
  *   A form API array for insertion into the signup form. 
  */
-function signup_basic_form_form(&$signup_form, &$form_state, $node, $pane_id, $signup_type = 'auth') {
+function signup_basic_form_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
   global $user;
   $form = array();
 
