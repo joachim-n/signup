@@ -264,6 +264,32 @@ function signup_webform_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 /**
+ * Implementation of hook_form_FORM_ID_alter().
+ *
+ * If a webform node is about to be deleted, and it is being used as a pane
+ * in one or more signup-enabled nodes, prevent deletion and explain why.
+ */
+function signup_webform_form_node_delete_confirm_alter(&$form, $form_state) {
+  $node = $form['#parameters'][2];
+  if ($node->type == 'webform') {
+    $webform_nid = $node->nid;
+    $pane_id = 'webform_' . $node->nid;
+    // Get the signup nodes the pane based on this webform is used in.
+    $result = db_query("SELECT n.nid, n.title FROM {signup_panes} sp INNER JOIN {node} n ON sp.nid = n.nid WHERE sp.pane_id = '%s'", $pane_id);
+    while ($signup_node = db_fetch_object($result)) {
+      $items[] = l($signup_node->title, 'node/' . $signup_node->nid);
+    }
+    if (count($items)) {
+      // Overwrite the description text and append the list of signup nodes.
+      $form['description']['#value'] = t('This webform can not be deleted because it is currently used in the following signup-enabled content:');
+      $form['description']['#suffix'] = theme('item_list', $items);
+      drupal_set_title(t('Unable to delete %title', array('%title' => $node->title)));
+      unset($form['actions']['submit']);
+    }
+  }
+}
+
+/**
  * Get the webform submission record for a given signup record.
  *
  * @param $signup
