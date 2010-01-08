@@ -232,19 +232,19 @@ function theme_signup_node_settings_form_panes($form) {
   if (!count($rows)) {
     $rows[] = array(
       array(
-        'data' => 'No form panes are available.',
+        'data' => t('No form panes are available.'),
         'colspan' => 3,
       )
     );
   }
   
-  $header[] = 'Enabled';
+  $header[] = t('Enabled');
   if (isset($form[$key]['weight'])) {
-    $header[] = 'Weight';
+    $header[] = t('Weight');
   }
-  $header[] = 'Name';
-  $header[] = 'Description';
-  $header[] = 'Operations';
+  $header[] = t('Name');
+  $header[] = t('Description');
+  $header[] = t('Operations');
   
   if (isset($form[$key]['weight'])) {  
     drupal_add_tabledrag('signup-node-settings-panes', 'order', 'sibling', 'signup-pane-weight');
