@@ -34,6 +34,7 @@ function signup_webform_signup_pane_info() {
       'label' => 'Webform: ' . $webform->title,
       'description' => t('Collects data for the webform.'),
       'callback' => 'signup_webform_form',
+      'operations' => l(t('Edit components'), 'node/' . $webform->nid . '/edit/components'),
     );
   }
   

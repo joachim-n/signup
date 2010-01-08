@@ -84,6 +84,11 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $form['signup_form_panes'][$id]['description'] = array(
       '#value' => $signup_form_pane['description'],
     );
+    if (isset($signup_form_pane['operations'])) {
+      $form['signup_form_panes'][$id]['operations'] = array(
+        '#value' => $signup_form_pane['operations'],
+      );
+    }
     $form['signup_form_panes'][$id]['weight'] = array(
       '#type' => 'weight',
       '#delta' => 10,      
@@ -215,7 +220,8 @@ function theme_signup_node_settings_form_panes($form) {
     }
     $row[] = drupal_render($form[$key]['label']);
     $row[] = drupal_render($form[$key]['description']);
-    
+    $row[] = drupal_render($form[$key]['operations']);
+        
     $rows[] = array(
       'data' => $row,
       'class' => 'draggable',
@@ -238,6 +244,7 @@ function theme_signup_node_settings_form_panes($form) {
   }
   $header[] = 'Name';
   $header[] = 'Description';
+  $header[] = 'Operations';
   
   if (isset($form[$key]['weight'])) {  
     drupal_add_tabledrag('signup-node-settings-panes', 'order', 'sibling', 'signup-pane-weight');

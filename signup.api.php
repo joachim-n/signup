@@ -23,6 +23,8 @@
  *     - 'label': (required) The human-readable name of the form.
  *     - 'description': (required) Extra information about the form.
  *     - 'callback': (required) The name of a function.
+ *     - 'operations': (optional) A string consisting of one or more links to 
+ *        useful operations concerning this pane.
  *
  * @see signup_basic_form_form.
  */
