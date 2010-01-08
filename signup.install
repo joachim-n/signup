@@ -516,13 +516,15 @@ function signup_update_6003() {
 }
 
 /**
- * Create the {signup_panes} table.
+ * Create the {signup_panes} table, and add the basic form to all existing nodes.
  */
 function signup_update_6200() {
   $ret = array();
   
   $schema = signup_schema();
   db_create_table(&$ret, 'signup_panes', $schema['signup_panes']);
+  
+  $ret = db_query("INSERT INTO {signup_panes} (nid, pane_id, weight) SELECT nid, 'basic', 0 FROM {signup}");
   
   return $ret;
 }
