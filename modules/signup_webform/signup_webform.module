@@ -16,9 +16,7 @@
  * so it cant be submitted there (but visible for checking)
  * @todo: figure out why an unpublished webform doesn't render its components
  * and spoof this so admins can unpublish a signup webform to hide it.
- * @todo: add a link to configure the webform from the signup admin
  * @todo: hook_nodeapi: delete: delete ALL stuff for this node!
- * @todo: use hook_form_alter to prevent deletion of webform nodes whose panes are used? or at least warn.
  */
 
 /**
