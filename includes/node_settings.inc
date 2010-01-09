@@ -269,7 +269,8 @@ function signup_node_settings_form_submit($form, &$form_state) {
   if ($op == t('Reset to defaults')) {
     // If we're resetting, we just want to grab the site-wide defaults.
     $values = db_fetch_array(db_query("SELECT forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
-    // @todo: delete the signup_panes entries.
+    // Clear all the panes for the node.
+    db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);    
   }
   else {
     // Handle the pane settings.
