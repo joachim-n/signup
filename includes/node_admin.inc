@@ -64,8 +64,6 @@ function signup_node_admin_details_form(&$form_state, $node) {
     array('data' => t('Extra information')),
     array('data' => t('Attendance'), 'field' => 's.attended'),
   );
-  
-  dsm($node);
 
   $sql = "SELECT u.uid, u.name, s.* FROM {signup_log} s INNER JOIN {users} u ON u.uid = s.uid WHERE s.nid = %d";
   $sql .= tablesort_sql($header);
@@ -86,7 +84,10 @@ function signup_node_admin_details_form(&$form_state, $node) {
     $users[$key] = '';
     $form['username'][$key] = array('#value' => $username);
     $form['signup_date'][$key] = array('#value' => format_date($signed_up_user->signup_time, variable_get('signup_date_format', 'small')));
-    $form['signup_form_data'][$key] = array('#value' => theme('signup_custom_data', unserialize($signed_up_user->form_data)));
+    // Unpack the stored signup form data and allow other modules to alter it.
+    $signup_form_data = unserialize($signed_up_user->form_data);
+    drupal_alter('signup_form_data_display', $signup_form_data, $node->nid, $key);
+    $form['signup_form_data'][$key] = array('#value' => theme('signup_custom_data', $signup_form_data));
     $form['attended'][$key] = array('#value' => theme('signup_attended_text', $signed_up_user->attended));
   }
   if (empty($users)) {

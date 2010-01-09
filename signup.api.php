@@ -238,3 +238,24 @@ function hook_signup_menu_access($node, $menu_type) {
   // powers over events in their group.
 }
 
+/**
+ * Implementation of hook_signup_form_data_display().
+ *
+ * Allow modules to alter signup form data prior to displaying signup records
+ * in, for example, a node's list of signups at node/N/signups/admin.
+ *
+ * This allows modules that implement signup panes for format or even inject 
+ * their own data.
+ *
+ * @param $form_data
+ *  The user's signup data to alter.
+ * @param $nid
+ *  The node id for the signup-enabled node.
+ * @param $sid
+ *  The signup record id. WARNING: NOT the submission sid!
+ */
+function hook_signup_form_data_display_alter(&$form_data, $nid, $sid) {
+  foreach ($form_data as $pane_id => $pane_data) {
+    // If this is one of your panes, do stuff to it.
+  }
+}
