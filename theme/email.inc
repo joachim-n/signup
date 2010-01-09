@@ -71,7 +71,14 @@ function theme_signup_custom_data_field_text($key, $value) {
   // warnings when extracting strings, "hide" the call to t() by using a
   // variable to hold the function name.
   $tr = 't';
-  return $tr($key) .': '. $value;
+  // If a key is numeric, we assume the module that set it knows what it is
+  // doing and provides its own label.
+  if (is_numeric($key)) {
+    return $value;
+  }
+  else {
+    return $tr($key) .': '. $value;
+  }
 }
 
 /**

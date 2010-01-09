@@ -138,7 +138,14 @@ function theme_signup_custom_data($data) {
       $output .= call_user_func(__FUNCTION__, $value);
     }
     else {
-      $output .= $tr($key) .': '. check_plain($value);
+      // If a key is numeric, we assume the module that set it knows what it is
+      // doing and provides its own label.
+      if (is_numeric($key)) {
+        $output .= check_plain($value);
+      }
+      else {
+        $output .= $tr($key) .': '. check_plain($value);
+      }
     }
     $output .= "</div>\n";
   }
