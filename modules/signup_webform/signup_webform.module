@@ -248,12 +248,11 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
       foreach ($submission->data as $cid => $component_data) {
         $component = $components[$webform_nid][$cid];
         $label     = $components[$webform_nid][$cid]['name'];
-        // Hijack webform's email output theming. This, unfortunately, puts the
-        // component label at the front; signup module's output prints the array
-        // key as the label: net result we get it twice. Minor bug. @todo.
+        // Hijack webform's email output theming.
         $themed_output = theme('webform_mail_' . $component['type'], $component_data['value'], $component);
         //dsm('webform_mail_' . $component['type']);
-        // Use a numeric key rather than $label so the key is not output by theme functions.
+        // Use a numeric key rather than $label so the key is not output by theme functions;
+        // this is because webform's output already includes the label.
         $form_data[$pane_id][] = $themed_output;
       }
     }
