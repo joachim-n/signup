@@ -249,6 +249,12 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
         $component = $components[$webform_nid][$cid];
         $label     = $components[$webform_nid][$cid]['name'];
         // Hijack webform's email output theming.
+        // @todo: textfields do not render properly here; I am assuming that
+        // all single-values fields need their arrays exploding. Figure out
+        // what is going on with webform and do this the correct way!
+        if  (count($component_data['value']) == 1) {
+          $component_data['value'] = array_shift($component_data['value']); 
+        }
         $themed_output = theme('webform_mail_' . $component['type'], $component_data['value'], $component);
         //dsm('webform_mail_' . $component['type']);
         // Use a numeric key rather than $label so the key is not output by theme functions;
