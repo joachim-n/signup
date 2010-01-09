@@ -71,6 +71,10 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     '#description' => t('Enable the signup form panes you want to use on this signup. You may also drag enabled panes into any order. The position of disabled panes in the list is ignored.'),
     '#theme' => 'signup_node_settings_form_panes',
   );
+  // Add a warning if there are already existing signups.
+  if ($node->signup_effective_total > 0) {
+     $form['signup_form_panes']['#description'] .= t(' <span class="warning">There are existing signups recorded. If you disable panes their data will remain in your records; if you enable panes past signups will not have any data for them.</span>');
+  }
   
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
     $form['signup_form_panes'][$id]['enabled'] = array(
