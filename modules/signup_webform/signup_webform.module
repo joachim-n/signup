@@ -18,6 +18,8 @@
  * @todo: figure out why an unpublished webform doesn't render its components
  *   and spoof this so admins can unpublish a signup webform to hide it.
  * @todo: hook_nodeapi: delete: delete ALL stuff for this node!
+ * @todo: should we consider the 'access own webform submissions' permission
+ *   when showing signup data that includes webform submissions?
  */
 
 /**
@@ -248,7 +250,9 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
       foreach ($submission->data as $cid => $component_data) {
         $component = $components[$webform_nid][$cid];
         $label     = $components[$webform_nid][$cid]['name'];
-        // Hijack webform's email output theming.
+        // Hijack webform's email output theming: this, as far as I can tell,
+        // is the only way there is of getting a component's data flattened to 
+        // a human-readable string.
         // @todo: textfields do not render properly here; I am assuming that
         // all single-values fields need their arrays exploding. Figure out
         // what is going on with webform and do this the correct way!
@@ -256,9 +260,8 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
           $component_data['value'] = array_shift($component_data['value']); 
         }
         $themed_output = theme('webform_mail_' . $component['type'], $component_data['value'], $component);
-        //dsm('webform_mail_' . $component['type']);
-        // Use a numeric key rather than $label so the key is not output by theme functions;
-        // this is because webform's output already includes the label.
+        // Use a numeric key rather than $label so the key is not output by 
+        // theme functions -- webform's output already includes the label.
         $form_data[$pane_id][] = $themed_output;
       }
     }
@@ -273,7 +276,6 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
  * When a signup is canceled, delete the corresponding webform submission.
  */
 function signup_webform_signup_cancel($signup, $node) {
-  // We appear to come here unserialized; is this a bug? @todo
   $form_data = unserialize($signup->form_data);
   
   foreach (_signup_webform_pane_ids($form_data) as $pane_id) {
