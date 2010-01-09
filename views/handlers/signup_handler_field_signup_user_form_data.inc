@@ -20,10 +20,10 @@ class signup_handler_field_signup_user_form_data extends views_handler_field_pre
    * hook_signup_form_data_display_alter().
    */
   function query() {
-    parent::query();
-    
     $this->ensure_my_table();
     $this->add_additional_fields();
+
+    parent::query();
   }
 
   /**
