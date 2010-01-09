@@ -114,15 +114,10 @@ function signup_edit_form($form_state, $signup, $type) {
         if (!isset($form['elements']['signup_form_data'][$pane_id][$key]['#default_value'])) {
           $form['elements']['signup_form_data'][$pane_id][$key]['#default_value'] = $value;
         }
-        if (!$can_edit) {
-          // If they can't edit, mark all the fields as disabled.
-          // @todo @fixme this is not working.
-          $form['elements']['signup_form_data'][$pane_id][$key]['#disabled'] = TRUE;
-        }
       }
     }
   }
-
+  
   // Add the appropriate buttons based on permissions.
   if ($can_edit) {
     $form['elements']['save'] = array(
@@ -131,6 +126,11 @@ function signup_edit_form($form_state, $signup, $type) {
       '#submit' => array('signup_edit_form_save_submit'),
     );
   }
+  else {
+    // If they can't edit, mark all the fields as disabled.
+    _signup_form_element_disable_recursive($form['elements']['signup_form_data']);
+  }
+  
   if ($can_cancel) {
     if (isset($_REQUEST['destination'])) {
       $destination = drupal_get_destination();
@@ -147,6 +147,20 @@ function signup_edit_form($form_state, $signup, $type) {
   }
 
   return $form;
+}
+
+/**
+ * Helper function to recursively disable all elements of a form.
+ */
+function _signup_form_element_disable_recursive(&$form) {
+  if (isset($form['#type'])) {
+    $form['#disabled'] = TRUE;    
+  }
+  foreach (element_children($form) as $key) {
+    if (is_array($form[$key])) {
+      _signup_form_element_disable_recursive($form[$key]);
+    }
+  }
 }
 
 /**
