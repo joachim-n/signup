@@ -150,9 +150,14 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
     }
     
     if (isset($signup->sid)) {
-      // existing signup: update rather than insert.
+      // existing signup: update the webform submission with the new data.
       $submission_sid = db_result(db_query('SELECT submission_sid FROM {signup_webform_submission} WHERE signup_sid = %d AND webform_nid = %d', $signup->sid, $webform_nid));
       webform_submission_update($webform_node, $submission_sid, $submitted);
+      // We technically don't need this but if new signups have a sid in the data
+      // and ones that have been edited don't, it's just going to look weird.
+      $signup->form_data[$pane_id] = array(
+        'sid' => $submission_sid,
+      );
     }
     else {
       // new signup: insert webform submission.

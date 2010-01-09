@@ -64,6 +64,8 @@ function signup_node_admin_details_form(&$form_state, $node) {
     array('data' => t('Extra information')),
     array('data' => t('Attendance'), 'field' => 's.attended'),
   );
+  
+  dsm($node);
 
   $sql = "SELECT u.uid, u.name, s.* FROM {signup_log} s INNER JOIN {users} u ON u.uid = s.uid WHERE s.nid = %d";
   $sql .= tablesort_sql($header);
