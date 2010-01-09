@@ -1242,8 +1242,6 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
     $signup_info = array();
     if (!empty($signup_form['signup_form_data'])) {
       $signup_info = $signup_form['signup_form_data'];
-      // @todo? the form element keys are saved as keys and
-      // later shown in the signup record: these are not very human-friendly.
     }
     if (!empty($extra)) {
       $signup_info = array_merge($signup_info, $extra);
