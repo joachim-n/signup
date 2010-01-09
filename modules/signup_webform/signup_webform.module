@@ -252,7 +252,8 @@ function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) 
         // key as the label: net result we get it twice. Minor bug. @todo.
         $themed_output = theme('webform_mail_' . $component['type'], $component_data['value'], $component);
         //dsm('webform_mail_' . $component['type']);
-        $form_data[$pane_id][$label] = $themed_output;
+        // Use a numeric key rather than $label so the key is not output by theme functions.
+        $form_data[$pane_id][] = $themed_output;
       }
     }
     // Remove the sid from display: it is internal data.
