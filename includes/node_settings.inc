@@ -56,7 +56,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
   // Put in weights from either saved settings or for panes not enabled on this 
   // node a default heavy weight of 10.
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
-    $signup_form_pane_info[$id]['weight'] = isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id] : 10;
+    $signup_form_pane_info[$id]['weight'] = isset($node->signup_form_panes[$id]) ? $node->signup_form_panes[$id]['weight'] : 10;
   }
   // Sort the list by weight so it appears correctly in the UI.
   uasort($signup_form_pane_info, '_signup_cmp_weight'); 
@@ -293,7 +293,11 @@ function signup_node_settings_form_submit($form, &$form_state) {
         $signup_panes[$pane_id] = 0;
       }
       
-      // Get the pane info so we know the callbacks.
+      // Get the pane info so we know the callbacks. Callbacks are saved
+      // (somewhat redundantly) into {signup_panes} so on node view and other
+      // form displays we don't need to invoke the 'signup_pane_info':
+      // some modules implementing this run queries, so it's potentially 
+      // expensive.
       $signup_form_pane_info = module_invoke_all('signup_pane_info');
       
       // Sort by weight, preserve keys.

@@ -90,17 +90,14 @@ function signup_edit_form($form_state, $signup, $type) {
     $form['elements']['signup_form_data'] = array(
       '#tree' => TRUE,
     );
-    $signup_form_data = module_invoke_all('signup_pane_info');
     foreach (array_keys($node->signup_form_panes) as $pane_id) {
-      if (isset($signup_form_data[$pane_id])) {
-        $callback = $signup_form_data[$pane_id]['callback'];
-        // Each pane goes into its own form element with #tree set
-        // to protect form values from clashing.
-        $form['elements']['signup_form_data'][$pane_id] = array(
-          '#tree' => TRUE,
-        );
-        $form['elements']['signup_form_data'][$pane_id] += $callback($form, $form_state, $node, $signup, $pane_id, $signup_type);
-      }
+      $callback = $node->signup_form_panes[$pane_id]['callback'];
+      // Each pane goes into its own form element with #tree set
+      // to protect form values from clashing.
+      $form['elements']['signup_form_data'][$pane_id] = array(
+        '#tree' => TRUE,
+      );
+      $form['elements']['signup_form_data'][$pane_id] += $callback($form, $form_state, $node, $signup, $pane_id, $signup_type);
     }
   }
 
