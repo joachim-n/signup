@@ -292,10 +292,15 @@ function signup_node_settings_form_submit($form, &$form_state) {
         $pane_id = key($signup_panes);
         $signup_panes[$pane_id] = 0;
       }
+      
+      // Get the pane info so we know the callbacks.
+      $signup_form_pane_info = module_invoke_all('signup_pane_info');
+      
       // Sort by weight, preserve keys.
      // obsolete asort($signup_panes);
       foreach ($signup_panes as $pane_id => $weight) {
-        db_query("INSERT INTO {signup_panes} (nid, pane_id, weight) VALUES (%d, '%s', %d)", $node->nid, $pane_id, $weight);
+        db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) VALUES (%d, '%s', '%s', %d)", 
+          $node->nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
       }
     }
     

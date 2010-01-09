@@ -158,6 +158,13 @@ function signup_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'callback' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The name of the function that renders the pane.",
+      ),
       'weight' => array(
         'type' => 'int',
         'not null' => TRUE,
