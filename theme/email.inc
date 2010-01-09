@@ -56,6 +56,8 @@ function theme_signup_custom_data_email($data) {
  *
  * @param $key
  *   Name of the custom signup field (the array key).
+ *   If this is numeric, it is assumed that the $value contains its own label,
+ *   in which case the $key is not output.
  * @param $value
  *   Value of the custom signup field (the array value).
  *
