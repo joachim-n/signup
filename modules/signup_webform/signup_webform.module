@@ -153,8 +153,7 @@ function signup_webform_signup_data_alter(&$signup, $form_values) {
       // existing signup: update the webform submission with the new data.
       $submission_sid = db_result(db_query('SELECT submission_sid FROM {signup_webform_submission} WHERE signup_sid = %d AND webform_nid = %d', $signup->sid, $webform_nid));
       webform_submission_update($webform_node, $submission_sid, $submitted);
-      // We technically don't need this but if new signups have a sid in the data
-      // and ones that have been edited don't, it's just going to look weird.
+      // We store the sid so hook_signup_form_data_display() has something to work on.
       $signup->form_data[$pane_id] = array(
         'sid' => $submission_sid,
       );
@@ -187,6 +186,77 @@ function signup_webform_signup_insert($signup) {
     $submission_sid = $signup->form_data[$pane_id]['sid'];
     $webform_nid = substr($pane_id, 8);
     db_query("INSERT INTO {signup_webform_submission} (signup_sid, webform_nid, submission_sid) VALUES (%d, %d, %d)", $signup->sid, $webform_nid, $submission_sid);
+  }
+}
+
+/**
+ * Implementation of hook_signup_form_data_display_alter().
+ *
+ * Alter signup form data prior to displaying signup records in, for example,
+ * a node's list of signups.
+ *
+ * We remove the submission ID that is internal data.
+ * Since webform does not yet have view support, we add in the webform 
+ * submission data.
+ * @todo: Change all this when webform gets views support!
+ *
+ * @param $form_data
+ *  The user's signup data to alter.
+ * @param $nid
+ *  The node id for the signup-enabled node.
+ * @param $sid
+ *  The signup record id. WARNING: NOT the submission sid!
+ */
+function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) {
+  //dsm($form_data);
+  // Cache any webform components we load, as we are probably coming here 
+  // multiple times to show a set of signups that all involve the same webform.
+  static $components = array();
+  static $webform_loaded;
+
+  foreach (_signup_webform_pane_ids($form_data) as $pane_id) {
+    // Load the webform API.
+    if (!isset($webform_loaded)) {
+      module_load_include('inc', 'webform', 'webform_submissions');
+      module_load_include('inc', 'webform', 'webform_components');
+      webform_load_components();
+      $webform_loaded = TRUE;
+    }
+    
+    // Get the real nid from the prefixed pane ID.
+    $webform_nid = substr($pane_id, 8);
+
+    // Get the submission ID from the signup data and thence the submission.
+    // We could get this from {signup_webform_submission}, but might as well
+    // get it here.
+    // @todo: when signup switches entirely to Views-based output, we could use
+    // hook_views_data_alter() to add {signup_webform_submission}.submission_sid
+    // as an additional field for the ['signup_log']['form_data'] field.
+    $submission_sid = $form_data[$pane_id]['sid'];
+    $submission = webform_get_submission($webform_nid, $submission_sid);
+    
+    // Check there is an actual submission: if no webform fields are compulsory,
+    // a user can sign up and not create a corresponding webform submission.
+    if (isset($submission)) {
+      if (!isset($components[$webform_nid])) {
+        $webform_node = node_load($webform_nid);
+        // Cache the components for this webform node.
+        $components[$webform_nid] = $webform_node->webform['components'];
+      }
+
+      foreach ($submission->data as $cid => $component_data) {
+        $component = $components[$webform_nid][$cid];
+        $label     = $components[$webform_nid][$cid]['name'];
+        // Hijack webform's email output theming. This, unfortunately, puts the
+        // component label at the front; signup module's output prints the array
+        // key as the label: net result we get it twice. Minor bug. @todo.
+        $themed_output = theme('webform_mail_' . $component['type'], $component_data['value'], $component);
+        //dsm('webform_mail_' . $component['type']);
+        $form_data[$pane_id][$label] = $themed_output;
+      }
+    }
+    // Remove the sid from display: it is internal data.
+    unset($form_data[$pane_id]['sid']);
   }
 }
 
