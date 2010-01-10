@@ -48,14 +48,13 @@ function signup_basic_form_signup_pane_info() {
  *
  * @param &$signup_form
  *   The form array for the whole signup. You should not alter this, but it
- *   contains useful data depending on circumstances, such as the signup 
- *   object (in $form['#signup']) when an existing signup is being edited.
+ *   contains useful data depending on circumstances.
  * @param &$form_state
  *   Likewise. You might need this, but you probably don't.
  * @param $node
  *   The fully loaded node object.
  * @param $signup
- *   If this is an existing signup, the fully loaded node object. If this is a 
+ *   If this is an existing signup, the fully loaded signup object. If this is a 
  *   new signup, this is just NULL.
  * @param $pane_id
  *   The pane ID being invoked. This allows a module to implement multiple panes
