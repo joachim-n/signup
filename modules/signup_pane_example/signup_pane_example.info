@@ -1,0 +1,6 @@
+; $Id$
+name = Signup pane example
+description = Example implementation of a signup pane.
+package = Signup
+dependencies[] = signup
+core = 6.x
