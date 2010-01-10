@@ -208,8 +208,15 @@ function signup_webform_signup_insert($signup) {
  *  The node id for the signup-enabled node.
  * @param $sid
  *  The signup record id. WARNING: NOT the submission sid!
+ * @param $type
+ *  The type of output being prepared. Possible values are:
+ *    - 'list': The hardcoded admin lists of signups, eg at node/X/signups/admin
+ *    - 'view': The form data field in Views.
+ *    - 'mail': Email output. This is likely the only one that needs special 
+ *      handling; in this case, modules should be more generous about supplying
+ *      data since there's no other place to see it.
  */
-function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid) {
+function signup_webform_signup_form_data_display_alter(&$form_data, $nid, $sid, $type = 'list') {
   //dsm($form_data);
   // Cache any webform components we load, as we are probably coming here 
   // multiple times to show a set of signups that all involve the same webform.

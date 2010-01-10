@@ -252,9 +252,16 @@ function hook_signup_menu_access($node, $menu_type) {
  * @param $nid
  *  The node id for the signup-enabled node.
  * @param $sid
- *  The signup record id. WARNING: NOT the submission sid!
+ *  The signup record id.
+ * @param $type
+ *  The type of output being prepared. Possible values are:
+ *    - 'list': The hardcoded admin lists of signups, eg at node/X/signups/admin
+ *    - 'view': The form data field in Views.
+ *    - 'mail': Email output. This is likely the only one that needs special 
+ *      handling; in this case, modules should be more generous about supplying
+ *      data since there's no other place to see it.
  */
-function hook_signup_form_data_display_alter(&$form_data, $nid, $sid) {
+function hook_signup_form_data_display_alter(&$form_data, $nid, $sid, $type = 'list') {
   foreach ($form_data as $pane_id => $pane_data) {
     // If this is one of your panes, do stuff to it.
   }

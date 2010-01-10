@@ -41,7 +41,7 @@ class signup_handler_field_signup_user_form_data extends views_handler_field_pre
           // Invoke hook_signup_form_data_display_alter() to let other modules
           // (in particular pane modules) alter the data for output.
           // This may involve internal data being removed.
-          drupal_alter('signup_form_data_display', $form_data, $nid, $sid);
+          drupal_alter('signup_form_data_display', $form_data, $nid, $sid, 'view');
           foreach ($form_data as $pane_id => $pane_data) {
             foreach ((array)$pane_data as $key => $value) {
               $this->items[$result->{$this->field_alias}][$key] = check_plain(theme('signup_custom_data_field_text', $key, $value));
