@@ -2,4 +2,5 @@
 name = Signup basic form
 description = Provides a signup form pane for name and phone.
 package = Signup
+dependencies[] = signup
 core = 6.x

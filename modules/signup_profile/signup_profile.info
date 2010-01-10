@@ -2,5 +2,6 @@
 name = Signup profile
 description = Provides a signup form pane integrated with profile module's fields.
 package = Signup
+dependencies[] = signup
 dependencies[] = profile
 core = 6.x
