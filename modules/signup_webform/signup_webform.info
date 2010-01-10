@@ -1,6 +1,6 @@
 ; $Id$
 name = Signup webform
-description = Provides signup form panes for webforms.
+description = Provides a signup form panes for each webform.
 dependencies[] = signup
 dependencies[] = webform
 package = Signup

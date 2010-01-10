@@ -1,6 +1,6 @@
 ; $Id$
 name = Signup profile
-description = Provides a signup form pane integrated with profile module's fields.
+description = Provides a signup form pane containing profile fields for each profile category.
 package = Signup
 dependencies[] = signup
 dependencies[] = profile

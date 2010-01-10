@@ -1,6 +1,6 @@
 ; $Id$
 name = Signup basic form
-description = Provides a signup form pane for name and phone.
+description = Provides a signup form pane with name and phone fields.
 package = Signup
 dependencies[] = signup
 core = 6.x
