@@ -1276,6 +1276,13 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
 
     // See if we should generate any notifications from this signup.
     if ($notify_user) {
+      // Invoke hook_signup_form_data_display_alter() to let other modules
+      // (in particular pane modules) alter the data for output.
+      // This may involve internal data being removed.
+      $form_data = $signup->form_data;
+      drupal_alter('signup_form_data_display', $form_data, $node->nid, $signup->sid);
+      $signup->form_data = $form_data;
+
       // Confirmation e-mail to the user who signed up.
       if ($node->signup_send_confirmation) {
         signup_send_confirmation_mail($signup, $node);
