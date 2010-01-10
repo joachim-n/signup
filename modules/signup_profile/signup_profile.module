@@ -7,6 +7,14 @@
  * Comments a-plenty as this is also an example of how to use the API.
  * This shows an example of how a signup pane can elect to do its own storage
  * of its signup data rather than letting signup handle storage.
+ *
+ * @todo: The big question about this module is what to do with anonymous signups.
+ * One possibility would be to add a module-wide admin setting to either:
+ * a) create a user account based on the entered anon email and so store the 
+ *    profile data there
+ * b) just don't show this pane and don't collect data
+ * c) give the user the choice of creating an account as they signup
+ * d) (crazyland) Store the data for anon users ourselves.
  */
 
 /**
@@ -87,12 +95,6 @@ function _signup_profile_available_categories() {
 function signup_profile_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
   $form = array();
   
-  // BIG @TODO: what do we do if this is an anon???
-  // maybe a setting to either:
-  //  a) create a user account based on the entered anon email
-  //  b) just don't show this pane and don't collect data
-  //  c) give the user the choice
-  
   // Get the real category name from the prefixed pane ID.
   $category = substr($pane_id, 8);
   
@@ -136,9 +138,7 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $signup, $pane_
  * saving of profile data, and remove the profile data from the signup so it is
  * not saved in the {signup_log} table's serialized array.
  */
-function signup_profile_signup_data_alter(&$signup, $form_values) {
-  // BIG @TODO: what do we do if this is an anon???
-  
+function signup_profile_signup_data_alter(&$signup, $form_values) { 
   // Check we have incoming data that concerns us.
   foreach($signup->form_data as $pane_id => $form_data_pane) {
     if (substr($pane_id, 0, 7) == 'profile') {
