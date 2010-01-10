@@ -40,26 +40,7 @@ function signup_basic_form_signup_pane_info() {
       'description' => t('Collects name and phone number.'),
       'callback' => 'signup_basic_form_form',
     ),
-    // this is just an extra item to test things.
-    'silly' => array(
-      'label' => t('Favourite colour'),
-      'description' => t('Should probably be blue.'),
-      'callback' => 'signup_basic_form_silly',
-    ),
   );
-}
-
-/**
- * Silly example just here for testing!
- */
-function signup_basic_form_silly(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
-  $form['favorite_color'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Favourite colour'),
-    '#size' => 40, '#maxlength' => 64,
-    '#required' => TRUE,
-  );
-  return $form;
 }
 
 /**
