@@ -261,6 +261,10 @@ function signup_views_data() {
           'table' => 'signup_log',
           'field' => 'nid',
         ),
+        'uid' => array(
+          'table' => 'signup_log',
+          'field' => 'uid',
+        ),
       ),
     ),
   );

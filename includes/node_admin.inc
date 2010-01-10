@@ -89,7 +89,7 @@ function signup_node_admin_details_form(&$form_state, $node) {
     // Invoke hook_signup_form_data_display_alter() to let other modules
     // (in particular pane modules) alter the data for output.
     // This may involve internal data being removed.
-    drupal_alter('signup_form_data_display', $signup_form_data, $node->nid, $key, 'list');
+    drupal_alter('signup_form_data_display', $signup_form_data, $node->nid, $key, $signed_up_user->uid, 'list');
     $form['signup_form_data'][$key] = array('#value' => theme('signup_custom_data', $signup_form_data));
     $form['attended'][$key] = array('#value' => theme('signup_attended_text', $signed_up_user->attended));
   }

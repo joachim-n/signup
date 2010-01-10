@@ -1280,7 +1280,7 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
       // (in particular pane modules) alter the data for output.
       // This may involve internal data being removed.
       $form_data = $signup->form_data;
-      drupal_alter('signup_form_data_display', $form_data, $node->nid, $signup->sid, 'mail');
+      drupal_alter('signup_form_data_display', $form_data, $node->nid, $signup->sid, $signup->uid, 'mail');
       $signup->form_data = $form_data;
 
       // Confirmation e-mail to the user who signed up.

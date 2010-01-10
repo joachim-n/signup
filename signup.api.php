@@ -253,6 +253,8 @@ function hook_signup_menu_access($node, $menu_type) {
  *  The node id for the signup-enabled node.
  * @param $sid
  *  The signup record id.
+ * @param $uid
+ *  The user id whose signup this is; 0 if this is an anonymous signup.
  * @param $type
  *  The type of output being prepared. Possible values are:
  *    - 'list': The hardcoded admin lists of signups, eg at node/X/signups/admin
@@ -261,7 +263,7 @@ function hook_signup_menu_access($node, $menu_type) {
  *      handling; in this case, modules should be more generous about supplying
  *      data since there's no other place to see it.
  */
-function hook_signup_form_data_display_alter(&$form_data, $nid, $sid, $type = 'list') {
+function hook_signup_form_data_display_alter(&$form_data, $nid, $sid, $uid, $type = 'list') {
   foreach ($form_data as $pane_id => $pane_data) {
     // If this is one of your panes, do stuff to it.
   }

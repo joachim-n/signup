@@ -103,6 +103,8 @@ function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $
  *  The node id for the signup-enabled node.
  * @param $sid
  *  The signup record id. WARNING: NOT the submission sid!
+ * @param $uid
+ *  The user id whose signup this is; 0 if this is an anonymous signup.
  * @param $type
  *  The type of output being prepared. Possible values are:
  *    - 'list': The hardcoded admin lists of signups, eg at node/X/signups/admin
@@ -111,7 +113,7 @@ function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $
  *      handling; in this case, modules should be more generous about supplying
  *      data since there's no other place to see it.
  */
-function signup_pane_example_signup_form_data_display_alter(&$form_data, $nid, $sid, $type = 'list') {
+function signup_pane_example_signup_form_data_display_alter(&$form_data, $nid, $sid, $uid, $type = 'list') {
   if (isset($form_data['example'])) {
     // Change our data array key from the form element key to something nicely readable.
     $form_data['example']['Favourite colour'] = $form_data['example']['favorite_color'];
