@@ -523,7 +523,8 @@ function signup_update_6003() {
 }
 
 /**
- * Create the {signup_panes} table, and add the basic form to all existing nodes.
+ * Create the {signup_panes} table, enable the signup_basic_form module,
+ * and add the basic form to all existing nodes.
  */
 function signup_update_6200() {
   $ret = array();
@@ -531,7 +532,11 @@ function signup_update_6200() {
   $schema = signup_schema();
   db_create_table(&$ret, 'signup_panes', $schema['signup_panes']);
   
+  module_enable('signup_basic_form');
+  
   $ret = db_query("INSERT INTO {signup_panes} (nid, pane_id, weight) SELECT nid, 'basic', 0 FROM {signup}");
+
+  $ret[] = array('success' => TRUE, 'query' => t('The Signup basic form module has been enabled and the basic "Name and Phone number" pane has been added to your existing signup-enabled content.'));
   
   return $ret;
 }
