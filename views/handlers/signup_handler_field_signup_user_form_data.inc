@@ -38,7 +38,8 @@ class signup_handler_field_signup_user_form_data extends views_handler_field_pre
         if ($form_data) {
           $sid = $result->{$this->aliases['sid']};
           $nid = $result->{$this->aliases['nid']};
-          // Let pane modules alter the data for output.
+          // Invoke hook_signup_form_data_display_alter() to let other modules
+          // (in particular pane modules) alter the data for output.
           // This may involve internal data being removed.
           drupal_alter('signup_form_data_display', $form_data, $nid, $sid);
           foreach ($form_data as $pane_id => $pane_data) {

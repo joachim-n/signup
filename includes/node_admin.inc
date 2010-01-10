@@ -84,8 +84,11 @@ function signup_node_admin_details_form(&$form_state, $node) {
     $users[$key] = '';
     $form['username'][$key] = array('#value' => $username);
     $form['signup_date'][$key] = array('#value' => format_date($signed_up_user->signup_time, variable_get('signup_date_format', 'small')));
-    // Unpack the stored signup form data and allow other modules to alter it.
+    // Unpack the stored signup form data.
     $signup_form_data = unserialize($signed_up_user->form_data);
+    // Invoke hook_signup_form_data_display_alter() to let other modules
+    // (in particular pane modules) alter the data for output.
+    // This may involve internal data being removed.
     drupal_alter('signup_form_data_display', $signup_form_data, $node->nid, $key);
     $form['signup_form_data'][$key] = array('#value' => theme('signup_custom_data', $signup_form_data));
     $form['attended'][$key] = array('#value' => theme('signup_attended_text', $signed_up_user->attended));
