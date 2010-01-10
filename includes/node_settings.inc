@@ -73,7 +73,7 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
   );
   // Add a warning if there are already existing signups.
   if ($node->signup_effective_total > 0) {
-     $form['signup_form_panes']['#description'] .= t(' <span class="warning">There are existing signups recorded. If you disable panes their data will remain in your records; if you enable panes past signups will not have any data for them.</span>');
+     $form['signup_form_panes']['#description'] .= t(' <span class="warning">There are existing signups recorded. If you disable panes their data will remain in your records; if you enable panes then past signups will not have any data for them.</span>');
   }
   
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
