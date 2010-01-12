@@ -274,44 +274,11 @@ function signup_node_settings_form_submit($form, &$form_state) {
     // If we're resetting, we just want to grab the site-wide defaults.
     $values = db_fetch_array(db_query("SELECT forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
     // Clear all the panes for the node.
-    db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);    
+    db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);
   }
   else {
     // Handle the pane settings.
-    // WTF new nodes come here with ALL WEIGHTS set at 10???
-    // @todo: new nodes probably need arbitrary weights setting?
-    foreach ($form_state['values']['signup_form_panes'] as $pane_id => $form_state_values_panes) {
-      if ($form_state_values_panes['enabled']) {
-        $signup_panes[$pane_id] = $form_state_values_panes['weight'];
-      }
-    }
-    // Clear all the panes for the node.
-    db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);    
-    // If there are enabled panes, save them.
-    if (count($signup_panes)) {
-      // Give a singleton pane a weight value, arbitrarily set to 0.
-      if (count($signup_panes) == 1) {
-        // Convoluted way of getting the first (and only!) key to set the value to 0
-        // @todo Suggestions for improvement welcome!
-        reset($signup_panes);
-        $pane_id = key($signup_panes);
-        $signup_panes[$pane_id] = 0;
-      }
-      
-      // Get the pane info so we know the callbacks. Callbacks are saved
-      // (somewhat redundantly) into {signup_panes} so on node view and other
-      // form displays we don't need to invoke the 'signup_pane_info':
-      // some modules implementing this run queries, so it's potentially 
-      // expensive.
-      $signup_form_pane_info = module_invoke_all('signup_pane_info');
-      
-      // Sort by weight, preserve keys.
-     // obsolete asort($signup_panes);
-      foreach ($signup_panes as $pane_id => $weight) {
-        db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) VALUES (%d, '%s', '%s', %d)", 
-          $node->nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
-      }
-    }
+    _signup_node_settings_panes_save($form_state['values']['signup_form_panes'], $node);
     
     // Populate $values from $form_state.
     foreach (array('forwarding_email', 'send_confirmation', 'confirmation_email', 'close_signup_limit') as $setting) {
