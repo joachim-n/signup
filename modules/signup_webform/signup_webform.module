@@ -356,9 +356,17 @@ function signup_webform_form_node_delete_confirm_alter(&$form, $form_state) {
     $webform_nid = $node->nid;
     $pane_id = 'webform_' . $node->nid;
     // Get the signup nodes the pane based on this webform is used in.
-    $result = db_query("SELECT n.nid, n.title FROM {signup_panes} sp INNER JOIN {node} n ON sp.nid = n.nid WHERE sp.pane_id = '%s'", $pane_id);
+    // A left join gets us the special case where nid is 0 which represents the 
+    // signup defaults.
+    $result = db_query("SELECT n.nid, n.title FROM {signup_panes} sp LEFT JOIN {node} n ON sp.nid = n.nid WHERE sp.pane_id = '%s'", $pane_id);
     while ($signup_node = db_fetch_object($result)) {
-      $items[] = l($signup_node->title, 'node/' . $signup_node->nid);
+      if ($signup_node->nid == 0 ) {
+        $text = t('Signup default settings');
+        $items[] = user_access('administer all signups') ? l($text, 'admin/settings/signup') : $text;
+      }
+      else {
+        $items[] = l($signup_node->title, 'node/' . $signup_node->nid);
+      }
     }
     if (count($items)) {
       // Overwrite the description text and append the list of signup nodes.
