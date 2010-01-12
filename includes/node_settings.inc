@@ -313,3 +313,51 @@ function signup_node_settings_form_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Helper function to save pane settings.
+ *
+ * Called from the form submit handlers for node settings and sitewide defaults.
+ *
+ * @param $form_state_values
+ *  The $form_state['values']['signup_form_panes'] array from the calling
+ *  form submit handler.
+ * @param $node
+ *  The node this signup is attached to.
+ */
+function _signup_node_settings_panes_save($form_state_values, $node) {
+  // WTF new nodes come here with ALL WEIGHTS set at 10???
+  // @todo: new nodes probably need arbitrary weights setting?
+  foreach ($form_state_values as $pane_id => $form_state_values_panes) {
+    if ($form_state_values_panes['enabled']) {
+      $signup_panes[$pane_id] = $form_state_values_panes['weight'];
+    }
+  }
+  // Clear all the panes for the node.
+  db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);
+
+  // If there are enabled panes, save them.
+  if (count($signup_panes)) {
+    // Give a singleton pane a weight value, arbitrarily set to 0.
+    if (count($signup_panes) == 1) {
+      // Convoluted way of getting the first (and only!) key to set the value to 0
+      // @todo Suggestions for improvement welcome!
+      reset($signup_panes);
+      $pane_id = key($signup_panes);
+      $signup_panes[$pane_id] = 0;
+    }
+
+    // Get the pane info so we know the callbacks. Callbacks are saved
+    // (somewhat redundantly) into {signup_panes} so on node view and other
+    // form displays we don't need to invoke the 'signup_pane_info':
+    // some modules implementing this run queries, so it's potentially
+    // expensive.
+    $signup_form_pane_info = module_invoke_all('signup_pane_info');
+
+    // Sort by weight, preserve keys.
+    // obsolete asort($signup_panes);
+    foreach ($signup_panes as $pane_id => $weight) {
+      db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) VALUES (%d, '%s', '%s', %d)", 
+        $node->nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
+    }
+  }
+}
