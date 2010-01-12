@@ -210,6 +210,8 @@ function signup_settings_form_submit($form, &$form_state) {
     $values[] = isset($form_state['values']['signup_reminder_email']) ? $form_state['values']['signup_reminder_email'] : '';
     $values[] = 0;  // "nid" of the row in {signup} for the global settings.
     db_query("UPDATE {signup} SET forwarding_email = '%s', send_confirmation = %d, confirmation_email = '%s', close_signup_limit = %d, send_reminder = %d, reminder_days_before = %d, reminder_email = '%s' WHERE nid = %d", $values);
+    // Handle the pane settings.
+    _signup_node_settings_panes_save($form_state['values']['signup_form_panes'], 0);
   }
   else {
     module_load_include('install', 'signup', 'signup');

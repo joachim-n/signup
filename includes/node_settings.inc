@@ -46,6 +46,15 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_reminder_days_before = $result->reminder_days_before;
     $node->signup_reminder_email = $result->reminder_email;
     $node->signup_close_signup_limit = $result->close_signup_limit;
+    // Load pane data
+    $result = db_query("SELECT * FROM {signup_panes} WHERE nid = 0 ORDER BY weight");
+    $node->signup_form_panes = array();
+    while ($pane_data = db_fetch_array($result)) {
+      $node->signup_form_panes[$pane_data['pane_id']] = array(
+        'weight' => $pane_data['weight'],
+        'callback' => $pane_data['callback'],
+      );
+    }
   }
   
   // Get information about all potential form panes from modules that 
