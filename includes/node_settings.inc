@@ -278,7 +278,7 @@ function signup_node_settings_form_submit($form, &$form_state) {
   }
   else {
     // Handle the pane settings.
-    _signup_node_settings_panes_save($form_state['values']['signup_form_panes'], $node);
+    _signup_node_settings_panes_save($form_state['values']['signup_form_panes'], $node->nid);
     
     // Populate $values from $form_state.
     foreach (array('forwarding_email', 'send_confirmation', 'confirmation_email', 'close_signup_limit') as $setting) {
@@ -321,10 +321,11 @@ function signup_node_settings_form_submit($form, &$form_state) {
  * @param $form_state_values
  *  The $form_state['values']['signup_form_panes'] array from the calling
  *  form submit handler.
- * @param $node
- *  The node this signup is attached to.
+ * @param $nid
+ *  The nid of the node this signup is attached to. May also be 0 for the case
+ *  that the defaults are being saved. This value should be used regardless.
  */
-function _signup_node_settings_panes_save($form_state_values, $node) {
+function _signup_node_settings_panes_save($form_state_values, $nid) {
   // WTF new nodes come here with ALL WEIGHTS set at 10???
   // @todo: new nodes probably need arbitrary weights setting?
   foreach ($form_state_values as $pane_id => $form_state_values_panes) {
@@ -333,7 +334,7 @@ function _signup_node_settings_panes_save($form_state_values, $node) {
     }
   }
   // Clear all the panes for the node.
-  db_query("DELETE FROM {signup_panes} WHERE nid = %d", $node->nid);
+  db_query("DELETE FROM {signup_panes} WHERE nid = %d", $nid);
 
   // If there are enabled panes, save them.
   if (count($signup_panes)) {
@@ -357,7 +358,7 @@ function _signup_node_settings_panes_save($form_state_values, $node) {
     // obsolete asort($signup_panes);
     foreach ($signup_panes as $pane_id => $weight) {
       db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) VALUES (%d, '%s', '%s', %d)", 
-        $node->nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
+        $nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
     }
   }
 }
