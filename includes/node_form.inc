@@ -68,6 +68,8 @@ function signup_save_node($node, $op) {
     $values = db_fetch_array(db_query("SELECT forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email FROM {signup} WHERE nid = 0"));
     $values[] = $node->nid;
     db_query("INSERT INTO {signup} (forwarding_email, send_confirmation, confirmation_email, close_signup_limit, send_reminder, reminder_days_before, reminder_email, nid) VALUES ('%s', %d, '%s', %d, %d, %d, '%s', %d)", $values);
+    // Copy the signup panes defaults to the new node.
+    db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) SELECT %d, pane_id, callback, weight FROM {signup_panes} WHERE nid = 0", $node->nid);
   }
 
   $node = node_load($node->nid);
