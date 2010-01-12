@@ -762,7 +762,6 @@ function signup_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $node->signup_reminder_days_before = $signup->reminder_days_before;
         $node->signup_reminder_email = $signup->reminder_email;
         $node->signup_close_signup_limit = $signup->close_signup_limit;
-        $node->signup_form_panes = $signup->form_panes;        
         $node->signup_status = $signup->status;
         if ($node->nid) {
           $node->signup_total = db_result(db_query("SELECT COUNT(*) FROM {signup_log} WHERE nid = %d", $node->nid));

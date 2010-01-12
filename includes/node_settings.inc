@@ -46,7 +46,6 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $node->signup_reminder_days_before = $result->reminder_days_before;
     $node->signup_reminder_email = $result->reminder_email;
     $node->signup_close_signup_limit = $result->close_signup_limit;
-    $node->signup_form_panes = $result->form_panes;
   }
   
   // Get information about all potential form panes from modules that 
