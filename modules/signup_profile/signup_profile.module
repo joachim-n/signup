@@ -55,7 +55,7 @@ function _signup_profile_available_categories() {
   $categories = profile_categories();
   // Get the number of fields in each category according to access. This will
   // let us determine if a category actually applies.
-  $result = db_query("SELECT category, COUNT(*) AS count FROM profile_fields  WHERE visibility <> 4 GROUP BY category", PROFILE_HIDDEN);
+  $result = db_query("SELECT category, COUNT(*) AS count FROM {profile_fields} WHERE visibility <> 4 GROUP BY category", PROFILE_HIDDEN);
   while ($row = db_fetch_array($result)) {
     $categories_count[$row['category']] = $row['count'];
   }
