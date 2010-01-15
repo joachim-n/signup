@@ -23,8 +23,21 @@
  *     - 'label': (required) The human-readable name of the form.
  *     - 'description': (required) Extra information about the form.
  *     - 'callback': (required) The name of a function.
- *     - 'operations': (optional) A string consisting of one or more links to 
- *        useful operations concerning this pane.
+ *     - 'operations': (optional) A list of links for the user to perform 
+ *        administrative tasks on this pane, either global or per-node settings.
+ *        The format is an unkeyed array of link arrays (suitable for passing
+ *        to theme_links).
+ *        You may use %nid as a token in your link's href property to
+ *        insert the node id of the current signup node. 
+ *        The following optional keys are also available:
+ *        - destination: if set to TRUE, the return destination will be appended
+ *          to the link as a query string with drupal_get_destination, allowing
+ *          the user to return to this page directly. Do not use if your link
+ *          sends the user to a complex series of forms or pages.
+ *        - not_defaults: if set to TRUE, this link will not be shown when 
+ *          default signup settings are being edited at admin/settings/signup.
+ *          Use this when your settings link would be meaningless in this 
+ *          context because it is dependent on the current node.
  *
  * @see signup_basic_form_form.
  */

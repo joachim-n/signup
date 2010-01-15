@@ -84,6 +84,9 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
      $form['signup_form_panes']['#description'] .= t(' <span class="warning">There are existing signups recorded. If you disable panes their data will remain in your records; if you enable panes then past signups will not have any data for them.</span>');
   }
   
+  // The draggable table of signup panes.
+  // @see hook_signup_pane_info() for information on the array structure here.
+  $href_replace_nid = isset($node->nid) ? $node->nid : 0;  
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
     $form['signup_form_panes'][$id]['enabled'] = array(
       '#type' => 'checkbox',
@@ -96,10 +99,25 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
     $form['signup_form_panes'][$id]['description'] = array(
       '#value' => $signup_form_pane['description'],
     );
+    // Signup panes may define links to operations for individual configuration.
     if (isset($signup_form_pane['operations'])) {
-      $form['signup_form_panes'][$id]['operations'] = array(
-        '#value' => $signup_form_pane['operations'],
-      );
+      foreach ($signup_form_pane['operations'] as $op_key => $operation) {
+        // Operations get the token %nid in their href replaced with the nid of 
+        // the current node or 0 for defaults.
+        $signup_form_pane['operations'][$op_key]['href'] = str_replace('%nid', $href_replace_nid, $signup_form_pane['operations'][$op_key]['href']);
+        // Operations may request to have the return destination appended to their link.
+        if (isset($operation['destination'])) {
+          $signup_form_pane['operations'][$op_key]['query'] .= drupal_get_destination();
+        }
+        // Operations with 'not_defaults' are skipped when there is no node.
+        if (!isset($node->nid) && isset($operation['not_defaults'])) {
+          unset($signup_form_pane['operations'][$op_key]);
+        }
+         $form['signup_form_panes'][$id]['operations'] = array(
+          // This array is rendered by theme_links() in the form's theme function.
+          '#value' => $signup_form_pane['operations'],
+        );
+      }
     }
     $form['signup_form_panes'][$id]['weight'] = array(
       '#type' => 'weight',
@@ -232,7 +250,18 @@ function theme_signup_node_settings_form_panes($form) {
     }
     $row[] = drupal_render($form[$key]['label']);
     $row[] = drupal_render($form[$key]['description']);
-    $row[] = drupal_render($form[$key]['operations']);
+    // Render all the operation links as a themed list of links.
+    // Changing what's in #value here seems a bit hackish, but AFAIK it's the only
+    // way to do the theming here rather than in the form builder.
+    // These all go in a single table cell because calculating colspan for a variable
+    // number of operations is not pretty and not worth it.
+    if (isset($form[$key]['operations'])) {
+      $form[$key]['operations']['#value'] = theme('links', $form[$key]['operations']['#value']);
+      $row[] = drupal_render($form[$key]['operations']);
+    }
+    else {
+      $row[] = '';
+    }
         
     $rows[] = array(
       'data' => $row,

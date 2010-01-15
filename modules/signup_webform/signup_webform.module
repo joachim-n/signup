@@ -25,7 +25,38 @@
 /**
  * Implementation of hook_signup_pane_info().
  *
- * This should return an associative array of data about signup form panes.
+ * Define our panes available to insert into the signup form.
+ *
+ * Panes should be provided by callback functions as a FormAPI array.
+ * The callback should have the following signature:
+ *   function my_callback(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth')
+ * See signup_basic_form_form for an example.
+ * The values submitted to the form elements defined by this form will be 
+ * serialized and stored in the {signup_log} table as 'form_data'.
+ *
+ * @return
+ *   An array of possible forms, keyed by a unique ID. Each value is itself an 
+ *   array of data, with the following key-value pairs:
+ *     - 'label': (required) The human-readable name of the form.
+ *     - 'description': (required) Extra information about the form.
+ *     - 'callback': (required) The name of a function.
+ *     - 'operations': (optional) A list of links for the user to perform 
+ *        administrative tasks on this pane, either global or per-node settings.
+ *        The format is an unkeyed array of link arrays (suitable for passing
+ *        to theme_links).
+ *        You may use %nid as a token in your link's href property to
+ *        insert the node id of the current signup node. 
+ *        The following optional keys are also available:
+ *        - destination: if set to TRUE, the return destination will be appended
+ *          to the link as a query string with drupal_get_destination, allowing
+ *          the user to return to this page directly. Do not use if your link
+ *          sends the user to a complex series of forms or pages.
+ *        - not_defaults: if set to TRUE, this link will not be shown when 
+ *          default signup settings are being edited at admin/settings/signup.
+ *          Use this when your settings link would be meaningless in this 
+ *          context because it is dependent on the current node.
+ *
+ * @see signup_basic_form_form.
  */
 function signup_webform_signup_pane_info() {
   // Get the webform nodes.
@@ -35,7 +66,18 @@ function signup_webform_signup_pane_info() {
       'label' => 'Webform: ' . $webform->title,
       'description' => t('Collects data for the webform.'),
       'callback' => 'signup_webform_form',
-      'operations' => l(t('Edit components'), 'node/' . $webform->nid . '/edit/components'),
+      'operations' => array(
+        array(
+          'href'  => 'node/' . $webform->nid . '/edit',
+          'title' => 'Edit webform',
+          'destination' => TRUE,
+        ),
+        array(
+          'href'  => 'node/' . $webform->nid . '/edit/components',
+          'title' => 'Edit components',
+          'destination' => TRUE,
+        ),
+      ),
     );
   }
   
