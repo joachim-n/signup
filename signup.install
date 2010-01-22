@@ -530,7 +530,7 @@ function signup_update_6200() {
   $ret = array();
   
   $schema = signup_schema();
-  db_create_table(&$ret, 'signup_panes', $schema['signup_panes']);
+  db_create_table($ret, 'signup_panes', $schema['signup_panes']);
   
   module_enable('signup_basic_form');
   
