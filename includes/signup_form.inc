@@ -84,12 +84,14 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
     // order so there is no need for further sorting here.
     foreach ($node->signup_form_panes as $pane_id => $pane_data) {
       $callback = $pane_data['callback'];
-      // Each pane goes into its own form element with #tree set
-      // to protect form values from clashing.
-      $signup_form['signup_form_data'][$pane_id] = array(
-        '#tree' => TRUE,
-      );
-      $signup_form['signup_form_data'][$pane_id] += $callback($signup_form, $form_state, $node, NULL, $pane_id, $signup_type);
+      if (function_exists($callback)) {
+        // Each pane goes into its own form element with #tree set
+        // to protect form values from clashing.
+        $signup_form['signup_form_data'][$pane_id] = array(
+          '#tree' => TRUE,
+        );
+        $signup_form['signup_form_data'][$pane_id] += $callback($signup_form, $form_state, $node, NULL, $pane_id, $signup_type);
+      }
     }
   }
 
