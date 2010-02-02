@@ -534,7 +534,7 @@ function signup_update_6200() {
   
   module_enable('signup_basic_form');
   
-  $ret = db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) SELECT nid, 'basic', 'signup_basic_form_form', 0 FROM {signup}");
+  $ret[] = db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) SELECT nid, 'basic', 'signup_basic_form_form', 0 FROM {signup}");
 
   $ret[] = array('success' => TRUE, 'query' => t('The Signup basic form module has been enabled and the basic "Name and Phone number" pane has been added to your existing signup-enabled content.'));
   
