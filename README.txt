@@ -12,6 +12,13 @@ setting), and automatically close signups X hours before their start
 (general setting).  There are settings for restricting signups to
 selected roles and content types.
 
+Further information can be collected when users sign up to a node: several
+included modules provide extra panes that can be added to a signup form. 
+These allow the collection of the user's name and phone number, fields 
+from Drupal core's Profile module, and fields from a form created with the
+Webform module (http://druapl.org/project/webform). An API allows the creation 
+of customized modules to collect any kind of data in the signup form.
+
 There is support for both registered and anonymous users to sign up.
 Both can receive confirmation and reminder emails, and registered
 users are optionally able to cancel or edit their own signups and view
