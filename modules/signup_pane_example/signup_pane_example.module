@@ -84,9 +84,20 @@ function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $
  *
  * The advantage of doing this is that we can use it in Views as a field in its
  * own right, which allows sorting and filtering.
+ *
+ * Be aware that, at this point, the signup may not be assigned an sid if it is
+ * a new submission. You may use signup_pane_example_signup_insert() to save
+ * data after the signup has been stored in the database.
  */
 //function signup_pane_example_signup_data_alter(&$signup, $form_values) { }
 
+/**
+ * Implementation of hook_signup_insert().
+ *
+ * Carries on from signup_pane_example_signup_data_alter(). The signup is now
+ * saved to the database and is assigned an sid.
+ */
+//function signup_pane_example_signup_insert($signup) {}
 
 /**
  * Implementation of hook_signup_form_data_display_alter().
@@ -136,4 +147,6 @@ function signup_pane_example_signup_form_data_display_alter(&$form_data, $nid, $
  * If we are storing our own data, we should delete all of it that relates to 
  * this node.
  */
-//function signup_pane_example_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) { }
+//function signup_pane_example_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+//  if ($op == 'delete') {}
+//}
