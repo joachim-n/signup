@@ -44,6 +44,10 @@ function signup_pane_example_signup_pane_info() {
 /**
  * Signup form pane callback.
  *
+ * If you are handling your own data storage for this form, you should load any
+ * existing data here and load it into the '#default_value' attribute for each
+ * element of the returned array.
+ *
  * @param &$signup_form
  *   The form array for the whole signup. You should not alter this, but it
  *   contains useful data depending on circumstances.
@@ -63,7 +67,7 @@ function signup_pane_example_signup_pane_info() {
  *    'anon' -- anonymous user signup form (includes required email field).
  *    'admin' -- admin form to signup another user (includes user selector).
  * @return
- *   A form API array for insertion into the signup form. 
+ *   A form API array for insertion into the signup form.
  */
 function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
   $form['favorite_color'] = array(
