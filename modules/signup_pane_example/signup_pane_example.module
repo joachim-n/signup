@@ -10,6 +10,11 @@
  *
  * Defines panes available to signup forms.
  * 
+ * @param $node
+ *  (optional) The node being considered for panes.
+ *  Most modules won't need to look at this, but you may need to only return
+ *  panes if the node satisfies certain properties.
+ *
  * @return
  *  An associative array of data about signup form panes. 
  *  The key is the pane ID. The value is itself an associative array of the
@@ -31,7 +36,7 @@
  *    - 'anon' -- anonymous user signup form (main form includes required email field).
  *    - 'admin' -- admin form to signup another user (main form includes user selector).
  */
-function signup_pane_example_signup_pane_info() {
+function signup_pane_example_signup_pane_info($node = NULL) {
   return array(
     'example' => array(
       'label' => t('Favourite colour'),

@@ -20,9 +20,14 @@
 /**
  * Implementation of hook_signup_pane_info().
  *
+ * @param $node
+ *  (optional) The node being considered for panes.
+ *  Most modules won't need to look at this, but you may need to only return
+ *  panes if the node satisfies certain properties.
+ *
  * This should return an associative array of data about signup form panes.
  */
-function signup_profile_signup_pane_info() {
+function signup_profile_signup_pane_info($node = NULL) {
   // Get the categories. This may return NULL if none are defined yet.
   $categories = _signup_profile_available_categories();
   if (!is_null($categories)) {

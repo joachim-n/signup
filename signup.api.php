@@ -17,6 +17,11 @@
  * The values submitted to the form elements defined by this form will be 
  * serialized and stored in the {signup_log} table as 'form_data'.
  *
+ * @param $node
+ *  (optional) The node being considered for panes.
+ *  Most modules won't need to look at this, but you may need to only return
+ *  panes if the node satisfies certain properties.
+ *
  * @return
  *   An array of possible forms, keyed by a unique ID. Each value is itself an 
  *   array of data, with the following key-value pairs:
@@ -41,7 +46,7 @@
  *
  * @see signup_basic_form_form.
  */
-function hook_signup_pane_info() {
+function hook_signup_pane_info($node = NULL) {
   return array(
     'basic' => array(
       'label' => 'Basic form',

@@ -34,6 +34,11 @@
  * The values submitted to the form elements defined by this form will be 
  * serialized and stored in the {signup_log} table as 'form_data'.
  *
+ * @param $node
+ *  (optional) The node being considered for panes.
+ *  Most modules won't need to look at this, but you may need to only return
+ *  panes if the node satisfies certain properties.
+ *
  * @return
  *   An array of possible forms, keyed by a unique ID. Each value is itself an 
  *   array of data, with the following key-value pairs:
@@ -58,7 +63,7 @@
  *
  * @see signup_basic_form_form.
  */
-function signup_webform_signup_pane_info() {
+function signup_webform_signup_pane_info($node = NULL) {
   // Get the webform nodes.
   $result = db_query('SELECT n.title, n.nid FROM {node} n WHERE n.type = "webform" AND n.status = 1');
   while ($webform = db_fetch_object($result)) {
