@@ -88,6 +88,11 @@ function signup_node_settings_form($form_state, $node = NULL, $node_type = NULL,
   // @see hook_signup_pane_info() for information on the array structure here.
   $href_replace_nid = isset($node->nid) ? $node->nid : 0;  
   foreach ($signup_form_pane_info as $id => $signup_form_pane) {
+    // Stash the callback as a hidden value for the submit handler to find.
+    $form['signup_form_panes'][$id]['callback'] = array(
+      '#type' => 'value', 
+      '#value' => $signup_form_pane['callback'],
+    );
     $form['signup_form_panes'][$id]['enabled'] = array(
       '#type' => 'checkbox',
       '#default_value' => isset($node->signup_form_panes[$id]),
@@ -386,18 +391,13 @@ function _signup_node_settings_panes_save($form_state_values, $nid) {
       $signup_panes[$pane_id] = 0;
     }
 
-    // Get the pane info so we know the callbacks. Callbacks are saved
-    // (somewhat redundantly) into {signup_panes} so on node view and other
-    // form displays we don't need to invoke the 'signup_pane_info':
-    // some modules implementing this run queries, so it's potentially
-    // expensive.
-    $signup_form_pane_info = module_invoke_all('signup_pane_info');
-
     // Sort by weight, preserve keys.
     // obsolete asort($signup_panes);
     foreach ($signup_panes as $pane_id => $weight) {
+      // Store the signup pane information. Note the callback is retrieve from
+      // form values where we stashed it earlier.
       db_query("INSERT INTO {signup_panes} (nid, pane_id, callback, weight) VALUES (%d, '%s', '%s', %d)", 
-        $nid, $pane_id, $signup_form_pane_info[$pane_id]['callback'], $weight);
+        $nid, $pane_id, $form_state_values[$pane_id]['callback'], $weight);
     }
   }
 }
