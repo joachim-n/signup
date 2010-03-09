@@ -1620,6 +1620,8 @@ function _signup_get_username($signup, $link = FALSE) {
       $signup_data = unserialize($signup->form_data);
     }
   }
+  // Allow other modules to add their data.
+  drupal_alter('signup_form_data_display', $signup_data, $signup->nid, $signup->sid, $signup->uid)
   // Determine if this is an anon signup or not, and get the right info.
   if (!empty($signup->anon_mail)) {
     $user_name = theme('signup_anonymous_username', $signup_data, $signup->anon_mail);
