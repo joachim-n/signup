@@ -1,0 +1,87 @@
+<?php
+// $Id$
+/**
+ * @file signup_uc_attribute.install
+ * TODO: Enter file description here.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function signup_uc_attribute_schema() {
+  // The relationship between signup and Ubercart cart item is saved in its
+  // own table rather than in the signup form_data array to allow eventual
+  // access from Views.
+  $schema['signup_uc_cart_products'] = array(
+    'description' => 'Relates a {signup_log}.sid to a {uc_cart_products}.cart_item_id, giving access to the cart data saved for a given signup.',
+    'fields' => array(
+      'sid' => array(
+        'description' => 'The signup ID: {signup_log}.sid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cart_item_id' => array(
+        'description' => 'The {uc_cart_products}.cart_item_id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('sid'),
+  );
+
+  // The relationship between signup and Ubercart order item is saved in its
+  // own table rather than in the signup form_data array to allow eventual
+  // access from Views.
+  $schema['signup_uc_order_products'] = array(
+    'description' => 'Relates a {signup_log}.sid to a {uc_order_products}. order_id and order_product_id, giving access to the order data saved for a given signup.',
+    'fields' => array(
+      'sid' => array(
+        'description' => 'The signup ID: {signup_log}.sid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'order_id' => array(
+        'description' => 'The {uc_order_products}.order_id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'order_product_id' => array(
+        'description' => 'The {uc_order_products}.order_product_id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    // @todo: needs DB person to check this bit.
+    'primary key' => array('sid'),
+  );
+  
+  return $schema;
+}
+
+
+/**
+ * Implementation of hook_install().
+ */
+function signup_uc_attribute_install() {
+  // Create tables.
+  drupal_install_schema('signup_uc_attribute');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function signup_uc_attribute_uninstall() {
+  // Remove tables.
+  drupal_uninstall_schema('signup_uc_attribute');
+}
+

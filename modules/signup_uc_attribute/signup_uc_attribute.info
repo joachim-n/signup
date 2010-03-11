@@ -1,0 +1,7 @@
+; $Id$
+name = Signup Ubercart attributes
+description = Adds a signup pane for Ubercart product attributes
+core = 6.x
+package = Signup
+dependencies[] = signup
+dependencies[] = uc_attribute

@@ -1,0 +1,296 @@
+<?php
+// $Id$
+/**
+ * @file signup_uc_attribute.module
+ * Provides integration between signup and ubercart attributes: provides a 
+ * signup form pane for the product attributes.
+ *
+ * This is tied in with uc_attribute because I don't see a way of having the connection
+ * to UC in one module and the handling of attributes in another. Both would
+ * want to call uc_cart_add_item(); or the uc_attribute glue module would
+ * have to alter the product already in the cart and it seems messy. But
+ * suggestions welcome!
+ *
+ * @todo
+ *  - disallow UI cancellation of a UC signup
+ *  - deal with signups put into the cart but never bought: cancel them on cron?
+ *    consider making this feature as a standalone module so non-paid signups
+ *    can use it too somehow. (ie signups that need confirmation?)
+ *  - data storage to link signup SID with the UC order
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function signup_uc_attribute_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#signup_uc_attribute':
+      return t('TODO: Create admin help text.');
+    // OPTIONAL: Add additional cases for other paths that should display help text.
+  }
+}
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function Xsignup_uc_attribute_menu() { 
+  // This is the minimum information you can provide for a menu item.
+  $items['signup_uc_attribute'] = array(
+    'title' => 'signup debug',
+    'page callback' => 'TODO: Enter callback function',
+    'access arguments' => array('TODO: Enter user permissions'),
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_signup_pane_info().
+ *
+ * Defines panes available to signup forms.
+ * 
+ * @param $node
+ *  (optional) The node being considered for panes.
+ *  We use this to determine whether the node is a product and hence whether our
+ *  panes apply.
+ *
+ * @return
+ *  An associative array of data about signup form panes. 
+ *  The key is the pane ID. The value is itself an associative array of the
+ *  following form:
+ *    - label: A label for the admin UI.
+ *    - description: A longer description for the admin UI.
+ *    - callback: A callback function to generate the form.
+ */
+function signup_uc_attribute_signup_pane_info($node = NULL) {
+  // Only return a pane if the current node is an Ubercart product.
+  if (uc_product_is_product($node)) {
+    return array(
+      'uc_attribute' => array(
+        'label' => t('Product attributes'),
+        'description' => t("Shows Ubercart attributes for the signup-enable product node, and disables the regular Ubercart 'add to cart' form."),
+        'callback' => 'signup_uc_attribute_form',
+      ),
+    );
+  }
+}
+
+// -------------------------------- Signup form and associated alterations.
+
+/**
+ * Signup form pane callback.
+ *
+ * Generates the attributes form for this product node from Ubercart.
+ * @see signup_uc_attribute_form_alter() which correspondingly suppresses the
+ * default Ubercart 'add to cart' form.
+ *
+ * @param &$signup_form
+ *   The form array for the whole signup. You should not alter this, but it
+ *   contains useful data depending on circumstances.
+ * @param &$form_state
+ *   Likewise.
+ * @param $node
+ *   The fully loaded node object.
+ * @param $signup
+ *   If this is an existing signup, the fully loaded node object. If this is a 
+ *   new signup, this is just NULL.
+ * @param $pane_id
+ *   The pane ID being invoked. This allows a module to implement multiple panes
+ *   with one callback.
+ * @param $signup_type
+ *   Determines what kind of signup to generate a form for. Possible values:
+ *    'auth' -- regular authenticated user signup form
+ *    'anon' -- anonymous user signup form (includes required email field).
+ *    'admin' -- admin form to signup another user (includes user selector).
+ * @return
+ *   A form API array for insertion into the signup form. 
+ */
+function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
+  
+  // Add in attributes for this product node.
+  $ubercart_form = _uc_attribute_alter_form($node);
+  
+  // debug
+  $cart_id = uc_cart_get_id();
+    
+  $cart_contents = uc_cart_get_contents($cart_id);
+  dsm($cart_contents);
+  
+  return $ubercart_form;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * Remove the 'Add to cart' button and attribute selection when they are shown
+ * in the signup pane.
+ *
+ * We don't use hook_uc_form_alter() because uc_attribute_uc_form_alter() fires 
+ * after us and this is easier than fiddling with module weights.
+ */
+function signup_uc_attribute_form_alter(&$form, $form_state, $form_id) {
+  if (substr($form_id, 0, 27) == 'uc_product_add_to_cart_form') {
+    $nid = $form['nid']['#value'];
+    $node = node_load($nid);
+    // Act if the node is signup-enabled and it has the UC attributes pane.
+    if ($node->signup && isset($node->signup_form_panes['uc_attribute'])) {
+      unset($form['submit']);
+      if (isset($form['attributes'])) {
+        unset($form['attributes']);
+      }
+    }
+  }
+}
+
+// -------------------------------- Signup workflow.
+
+/**
+ * Implementation of hook_signup_data_alter().
+ *
+ * Intercept signup data before it is saved, and add the signup-enabled product
+ * to the cart.
+ */
+function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
+  // Only act if our pane is enabled on the signup node.
+  
+  // WTF. Tecnically we don't need this but I was going to put it in just as a safeguard
+  // (though can a node ever STOP being a product?) and the cursed thing FAILS. WHY? WTF?
+  // dsm('product ((' . $signup->nid . ')) ' . uc_product_is_product($signup->nid));
+  if (isset($signup->form_data['uc_attribute'])) {
+
+    dsm($signup);
+    dsm($form_values);
+    
+    /*
+    WARNING
+    The call to uc_cart_add_item is based entirely on retroengineering what UC
+    core does based on shoving in a dsm(func_get_args()) to the top of it.
+    This may or may not work in cases I haven't envisioned, and I lay the blame
+    entirely at the door of people who do not properly document their APIs!
+    */
+    $node = node_load($signup->nid);
+    $quantity = 1; // TODO: allow more than one with the other patch in the signup queue!
+    
+    // Get the selected UC attributes from the form.
+    $uc_attribute_data = $signup->form_data['uc_attribute'];
+    unset($signup->form_data['uc_attribute']);
+    
+    $data = array(
+      'attributes'  => $uc_attribute_data,
+      'model'       => FALSE, // no idea why!
+      'shippable'   => $node->shippable,
+      'signup_in_progress' => TRUE,
+    );
+    
+    // Add the item to the cart.
+    // Stuff to figure out:
+    // - do we always want this in the current user's cart? what if an admin signs up
+    //   another user: should the product appear in that user's cart?
+    uc_cart_add_item($node->nid, $quantity, $data,
+      NULL, // $cid
+      FALSE // $msg: whether to output messages
+      //TRUE  // $check_redirect??? @todo figure out if this is useful to us.
+    );
+
+    // Total WTF: uc_cart_add_item() returns no data WHATSOEVER about what we 
+    // have just done: no cart ID, no item ID, nada.
+    // So we have to take a wild stab at it and HOPE LIKE HELL that a site admin
+    // is not adding to a user's cart at the same time (assuming that's possible).
+    // @todo: if you have a better idea of how to handle this, please suggest!
+    
+    $cart_id = uc_cart_get_id();
+    $cart_contents = uc_cart_get_contents($cart_id, 'rebuild');
+    //dsm($cart_contents);
+    
+    foreach ($cart_contents as $index => $cart_item) {
+      $cart_item_ids[] = $cart_item->cart_item_id;
+    }
+    $latest_cart_item_id = max($cart_item_ids);
+    
+    // We have no signup sid here. 
+    // In order to set a connection to our own data, we put in our own data's ID 
+    // here, so we can retrieve it in hook_signup_insert().
+    $signup->temporary_data['uc_attribute_latest_cart_item_id'] = $latest_cart_item_id;
+  }
+}
+
+/**
+ * Implementation of hook_signup_insert().
+ *
+ * Carries on from signup_webform_signup_data_alter(). Saves the relationship
+ * between the signup and the cart item which we couldn't do earlier in 
+ * signup_webform_signup_data_alter() because at that point there is no signup id.
+ */
+function signup_uc_attribute_signup_insert($signup) {
+  // We want to store a relationship between:
+  // - cart ID
+  // - signup ID
+  // other data such as uid and nid is accessible from both of these.
+  db_query("INSERT INTO {signup_uc_cart_products} (sid, cart_item_id) VALUES (%d, %d)", 
+    $signup->sid, $signup->temporary_data['uc_attribute_latest_cart_item_id']);
+}
+
+// -------------------------------- Miscellaneous glue.
+
+/**
+ * Implementation of hook_cart_item().
+ *
+ * Act when a signup item is removed from the cart:
+ * - cancel the signup
+ * - remove our record
+ */
+function signup_uc_attribute_cart_item($op, &$item) {
+  if ($op == 'remove') {
+    // Remove is called both when the user manually chooses not to buy a product
+    // AND when the cart is emptied for the order creation.
+    // Bit of a WTF, no?
+    
+    // Load the product node (it is likely to be cached, eg if we are on the cart page).
+    $node = node_load($item->nid);
+    if ($node->signup) {
+      // Retrieve the signup and cancel it.
+      $query = db_query("SELECT sl.* FROM {signup_log} sl JOIN {signup_uc_cart_products} sucp ON sl.sid = sucp.sid WHERE sucp.cart_item_id = %d", $item->cart_item_id);
+      while ($signup = db_fetch_object($query)) {
+        signup_cancel_signup($signup);
+      }
+    }
+    // Delete our record.
+    db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $item->cart_item_id);       
+  } 
+}
+
+/**
+ * Implementation of hook_signup_cancel().
+ *
+ * When a signup is canceled, delete our data.
+ *
+ * @todo: find a way to prevent UI cancellation of signups: 
+ *  - if the product is in the cart, remove it from the cart
+ *  - if the order is complete, errr.... no idea!
+ */
+function signup_uc_attribute_signup_cancel($signup, $node) {
+}
+
+
+// -------------------------------- Utility.
+
+/**
+ * Helper function to get the product panes with from an array on pane IDs.
+ * 
+ * Same pattern as element_children().
+ *
+ * @param $signup_data
+ *  An array whose keys are pane IDs. Probably $signup->form_data.
+ * @return
+ *  An array of the keys that are IDs for webform panes.
+ */
+// TODO WRITE ME
+function _signup_uc_attribute_pane_ids($signup_data) {
+  $return = array();
+  foreach($signup_data as $pane_id => $data) {
+    if (substr($pane_id, 0, 7) == 'webform') {
+      $return[] = $pane_id;
+    }
+  }
+  return $return;
+}
