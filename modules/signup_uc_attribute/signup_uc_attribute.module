@@ -34,12 +34,14 @@ function signup_uc_attribute_help($path, $arg) {
 /**
  * Implementation of hook_menu().
  */
-function Xsignup_uc_attribute_menu() { 
-  // This is the minimum information you can provide for a menu item.
-  $items['signup_uc_attribute'] = array(
-    'title' => 'signup debug',
-    'page callback' => 'TODO: Enter callback function',
-    'access arguments' => array('TODO: Enter user permissions'),
+function signup_uc_attribute_menu() {
+  $items['admin/store/settings/signup'] = array(
+    'title' => 'Signup product settings',
+    'description' => 'Edit the signup settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('signup_uc_attribute_settings_form'),
+    'access arguments' => array('administer store'),
+    'file' => 'signup_uc_attribute.admin.inc',
   );
   return $items;
 }
