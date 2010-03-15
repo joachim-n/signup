@@ -34,6 +34,8 @@
  *
  * @todo
  *  - disallow UI cancellation of a UC signup
+ *  - disallow changing of UC attributes of an existing signup from the signup form
+ *    (or alter the cart item if it's still in the cart)
  *  - deal with signups put into the cart but never bought: cancel them on cron?
  *    consider making this feature as a standalone module so non-paid signups
  *    can use it too somehow. (ie signups that need confirmation?)
@@ -160,6 +162,27 @@ function signup_uc_attribute_form_alter(&$form, $form_state, $form_id) {
       unset($form['submit']);
       if (isset($form['attributes'])) {
         unset($form['attributes']);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter(): signup edit form.
+ *
+ * Replace the cancellation link on the signup edit form with a note about
+ * removing the corresponding item from the cart.
+ */
+function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
+  $node = node_load($form['#signup']->nid);
+  // Only act on signup-enabled nodes that have our pane enabled.
+  if (isset($node->signup_form_panes['uc_attribute'])) {
+    $result = db_query("SELECT cart_item_id FROM {signup_uc_cart_products} WHERE sid = %d", $form['#signup']->sid);
+    if ($cart_item_id = db_result($result)) {
+      if (isset($form['elements']['cancel-signup'])) {
+        // @todo: this should only be shown if the current user is the user whose signup this is.
+        // ie, check for and eliminate the case where an admin is editing the signup.
+        $form['elements']['cancel-signup']['#value'] = t('This is a paid signup. You may cancel this by removing the item from your cart.');
       }
     }
   }
