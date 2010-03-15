@@ -257,7 +257,7 @@ function hook_signup_menu_access($node, $menu_type) {
 }
 
 /**
- * Implementation of hook_signup_form_data_display().
+ * Implementation of hook_signup_form_data_display_alter().
  *
  * Allow modules to alter signup form data prior to displaying signup records
  * in, for example, a node's list of signups at node/N/signups/admin.
