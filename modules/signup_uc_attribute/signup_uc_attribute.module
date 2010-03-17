@@ -158,7 +158,7 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     
     // We have to have SOME sort of form value so the submit handler gets an array
     // for our pane in $form_state. Hence just a dummy value here.
-    $ubercart_form['aargh'] = array('#type' => 'value', '#value' => VERSION);
+    $ubercart_form['signup_uc_attribute_dummy'] = array('#type' => 'value', '#value' => VERSION);
   }
   else {
     // New signup: add the attributes form for this product node.
@@ -167,6 +167,10 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     // If a product has no attributes, we get NULL back.
     if (!isset($ubercart_form)) {
       $ubercart_form = array();
+      
+      // We have to have SOME sort of form value so signup_uc_attribute_signup_data_alter()
+      // gets something for our pane in $signup->form_data.
+      $ubercart_form['signup_uc_attribute_dummy'] = array('#type' => 'value', '#value' => VERSION);
     }
   }
 
@@ -237,16 +241,10 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
   // Only act on a new signup (we can't alter any ubercart attributes once a 
   // product is in the cart), and if our pane is enabled on the signup node.
   
-  // @todo: we do nothing here for products with no attributes.
-  
   // WTF. Tecnically we don't need this but I was going to put it in just as a safeguard
   // (though can a node ever STOP being a product?) and the cursed thing FAILS. WHY? WTF?
   // dsm('product ((' . $signup->nid . ')) ' . uc_product_is_product($signup->nid));
   if (!isset($signup->sid) && isset($signup->form_data['uc_attribute'])) {
-
-    dsm($signup);
-    dsm($form_values);
-    
     /*
     WARNING
     The call to uc_cart_add_item is based entirely on retroengineering what UC
