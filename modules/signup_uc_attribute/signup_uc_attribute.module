@@ -328,23 +328,11 @@ function signup_uc_attribute_order($op, &$arg1, $arg2) {
         db_query("INSERT INTO {signup_uc_order_products} (sid, order_id, order_product_id) VALUES (%d, %d, %d)", 
           $signup_sid, $arg1->order_id, $product->order_product_id);
 
-        // We don't need to clear our entry in {signup_uc_cart_products} as 
-        // hook_cart_item() op 'remove' will get called.
-        // @see <http://drupal.org/node/744956> which has a patch to change this.
-        
-        // Get the cart item ID
-        $result = db_query("SELECT cart_item_id FROM {signup_uc_cart_products} WHERE sid = %d", $signup_sid);
-        if ($cart_item_id = db_result($result)) {
-          dsm("cart_item_id: $cart_item_id");
-          
-        }
-        
-        $cart_item = uc_cart_get_item($cart_item_id);
-        $item->data['signup_status'] = 'checkout';
-        
-        // Update the cart item.
-        uc_cart_update_item($item);
-        
+        // We need to clear our entry in {signup_uc_cart_products} as although
+        // hook_cart_item() op 'remove' will get called, we do some heavy work 
+        // to bypass it.
+        // Delete our cart record.
+        db_query("DELETE FROM {signup_uc_cart_products} WHERE sid = %d", $signup_sid);
       }
     }
     
