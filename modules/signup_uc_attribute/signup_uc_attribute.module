@@ -495,32 +495,4 @@ function signup_uc_attribute_signup_expire($signup, $cart_item_id) {
 
 // -------------------------------- Utility.
 
-/**
- * Helper function to get the product panes with from an array on pane IDs.
- * 
- * Same pattern as element_children().
- *
- * @param $signup_data
- *  An array whose keys are pane IDs. Probably $signup->form_data.
- * @return
- *  An array of the keys that are IDs for webform panes.
- */
-// TODO WRITE ME
-function _signup_uc_attribute_pane_ids($signup_data) {
-  $return = array();
-  foreach($signup_data as $pane_id => $data) {
-    if (substr($pane_id, 0, 7) == 'webform') {
-      $return[] = $pane_id;
-    }
-  }
-  return $return;
-}
-
-/**
- * Implementation of hook_uc_checkout_complete().
- */
-function signup_uc_attribute_uc_checkout_complete($order, $account) {
-  dsm($order);
-  dsm($account);
-}
 
