@@ -275,6 +275,10 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
       FALSE // $msg: whether to output messages
       //TRUE  // $check_redirect??? @todo figure out if this is useful to us.
     );
+    
+    drupal_set_message(t('The product %title has been added to your cart. Your signup is temporary until you have completed checkout.', array(
+      '%title' => $node->title,
+    )));
 
     // Total WTF: uc_cart_add_item() returns no data WHATSOEVER about what we 
     // have just done: no cart ID, no item ID, nada.
