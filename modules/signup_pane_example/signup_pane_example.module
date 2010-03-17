@@ -99,6 +99,7 @@ function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $
  * data after the signup has been stored in the database.
  */
 function signup_pane_example_signup_data_alter(&$signup, $form_values) {
+  /*
   $our_value = $signup->form_data['favorite_color'];
   // Now save our value ourselves.
   // This gets us an ID: $our_id.
@@ -109,9 +110,11 @@ function signup_pane_example_signup_data_alter(&$signup, $form_values) {
   // However, we have no signup sid here. 
   // In order to set a connection to our own data, we put in our own data's ID 
   // here, so we can retrieve it in hook_signup_insert().
+  $our_id = 'coconuts';
   $signup->form_data[$pane_id] = array(
     'signup_pane_example_id' => $our_id,
   );
+  */
 }
 
 /**
@@ -121,6 +124,7 @@ function signup_pane_example_signup_data_alter(&$signup, $form_values) {
  * saved to the database and is assigned an sid.
  */
 function signup_pane_example_signup_insert($signup) {
+  /*
   // Retrieve the id for our own data from where we put it in the form data
   // in hook_signup_data_alter().
   $our_id = $signup->form_data[$pane_id]['signup_pane_example_id'];
@@ -128,6 +132,7 @@ function signup_pane_example_signup_insert($signup) {
   // We should now revisit our own data to save the connection between signup sid
   // and our own record for this signup.
   // Save a connection between $signup->sid and $our_id.
+  */
 }
 
 /**
