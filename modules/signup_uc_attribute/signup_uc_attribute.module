@@ -36,11 +36,6 @@
  *
  * @todo
  *  - disallow UI cancellation of a UC signup
- *  - disallow changing of UC attributes of an existing signup from the signup form
- *    (or alter the cart item if it's still in the cart)
- *  - deal with signups put into the cart but never bought: cancel them on cron?
- *    consider making this feature as a standalone module so non-paid signups
- *    can use it too somehow. (ie signups that need confirmation?)
  */
 
 /**
