@@ -102,7 +102,7 @@ function signup_uc_attribute_signup_pane_info($node = NULL) {
  * @param $node
  *   The fully loaded node object.
  * @param $signup
- *   If this is an existing signup, the fully loaded node object. If this is a 
+ *   If this is an existing signup, the fully loaded signup object. If this is a 
  *   new signup, this is just NULL.
  * @param $pane_id
  *   The pane ID being invoked. This allows a module to implement multiple panes
