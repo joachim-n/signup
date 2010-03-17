@@ -25,13 +25,9 @@
  *    is created in {signup_uc_order_products}.
  *    - signup_uc_attribute_order
  *    - signup_uc_attribute_cart_item, $op = remove
- *  - User does not check out within a specified delay: the signup is cancelled,
- *    the quantity in the cart is set to 0, and if the user returns to the cart
- *    they are informed of the cancellation and told to remove the item.
- *    - signup_uc_attribute_cron
- *    - signup_uc_attribute_signup_expire
- *    - signup_cancel_signup
- *    - on subsequent visit to cart: signup_uc_attribute_cart_item, $op = load
+ *  - User does not check out within a specified delay: the cart is emptied
+ *    by uc_cart module and the signup is cancelled,
+ *    - signup_uc_attribute_cart_item, $op = remove
  *
  * Data storage:
  *  - We store the relationship between Signup ID (sid) and Ubercart cart item ID
@@ -56,22 +52,6 @@ function signup_uc_attribute_help($path, $arg) {
       return t('TODO: Create admin help text.');
     // OPTIONAL: Add additional cases for other paths that should display help text.
   }
-}
-
-
-/**
- * Implementation of hook_menu().
- */
-function signup_uc_attribute_menu() {
-  $items['admin/store/settings/signup'] = array(
-    'title' => 'Signup product settings',
-    'description' => 'Edit the signup settings.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('signup_uc_attribute_settings_form'),
-    'access arguments' => array('administer store'),
-    'file' => 'signup_uc_attribute.admin.inc',
-  );
-  return $items;
 }
 
 /**
@@ -371,18 +351,6 @@ function signup_uc_attribute_order($op, &$arg1, $arg2) {
  */
 function signup_uc_attribute_cart_item($op, &$item) {
   switch ($op) {
-    case 'load':
-      // If a signup has been expired, inform the user of this and tell them
-      // to remove the item from their cart.
-      if (isset($item->data['signup_expired'])) {
-        $node = node_load($item->nid);
-        drupal_set_message(t('The item %item has expired. You must check out within @minutes minutes of signing up to a %type.', array(
-          '%item'     => $item->title,
-          '@minutes'  => variable_get('signup_uc_attribute_cart_timeout', 120),
-          '%type'     => node_get_types('name', $node->type),
-        )));
-      }
-      break;
     case 'remove':
       // Act when a signup item is removed from the cart:
       // - cancel the signup
@@ -435,60 +403,6 @@ function signup_uc_attribute_cart_item($op, &$item) {
  *  - if the order is complete, errr.... no idea!
  */
 function Xsignup_uc_attribute_signup_cancel($signup, $node) {
-}
-
-/**
- * Implementation of hook_cron().
- *
- * If a signup product has been in the cart (ie not checked out) for longer
- * than the allowable delay, remove it from the cart and cancel the signup.
- */
-function signup_uc_attribute_cron() {
-  // Calculate the cutoff timestamp.
-  $cutoff_time = time() - variable_get('signup_uc_attribute_cart_timeout', 120) * 60;
-  // Retrieve all signups cart items older than this time: they have expired.
-  $result = db_query("SELECT sl.*, sucp.cart_item_id FROM {signup_log} sl INNER JOIN {signup_uc_cart_products} sucp ON sl.sid = sucp.sid INNER JOIN {uc_cart_products} c ON sucp.cart_item_id = c.cart_item_id WHERE sl.signup_time < %d", $cutoff_time);
-  
-  while ($signup_cart_item = db_fetch_object($result)) {
-    signup_uc_attribute_signup_expire($signup_cart_item, $signup_cart_item->cart_item_id);
-  }
-}
-
-/**
- * Expire a signup item in the cart.
- *
- * Helper function for signup_uc_attribute_cron().
- *
- * @param $signup
- *  A fully-loaded signup item
- * @param $cart_item_id
- *  The cart item ID connected to this signup in a cart.
- */
-function signup_uc_attribute_signup_expire($signup, $cart_item_id) {
-  //dsm($signup);
-  //dsm($cart_item_id);
-  
-  // Get the cart item. Note this invokes hook_cart_item() op 'load' but we
-  // don't act at this point: there is no user to show a message to during
-  // a cron run. 
-  $item = uc_cart_get_item($cart_item_id);
-  
-  // Set the quantity to zero and update the item.
-  // (longwave said this would work ;)
-  $item->qty = 0;
-  
-  // Change our own data on the item.
-  unset($item->data['signup_in_progress']);
-  $item->data['signup_expired'] = TRUE;
-  
-  // Update the cart item; cancel the signup.
-  uc_cart_update_item($item);
-  signup_cancel_signup($signup);
-
-  // Delete our cart record.
-  db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $cart_item_id);
-  
-  return;
 }
 
 // -------------------------------- Utility.
