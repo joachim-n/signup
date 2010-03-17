@@ -116,15 +116,55 @@ function signup_uc_attribute_signup_pane_info($node = NULL) {
  *   A form API array for insertion into the signup form. 
  */
 function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $pane_id, $signup_type = 'auth') {
-  
-  // Add in attributes for this product node.
-  $ubercart_form = _uc_attribute_alter_form($node);
-  
-  // debug
-  $cart_id = uc_cart_get_id();
+  if (isset($signup)) {
+    // An existing signup may not have its Ubercart product attributes edited,
+    // as this would change the price of the product and:
+    // - if it is in the cart, UC has no
+    //   UI for changing these once in the cart anyway.
+    // - if it is already paid for, then it's too late!
+    // We show the user the options they chose and an explanation of why they
+    // can't be edited.
     
-  $cart_contents = uc_cart_get_contents($cart_id);
-  //dsm($cart_contents);
+    // Retrieve the product tied to this existing signup: either a cart item or an order product.
+    if ($cart_item_id = signup_uc_attribute_get_cart_item_id($signup->sid)) {
+      $product = uc_cart_get_item($cart_item_id);
+      
+      $message = t('Options which affect the price of the signup may not be altered once it has been added to the cart. To change these options, remove %title from your <a href="!cart-url">cart</a> and sign up again.', array(
+        '!cart-url' => url('cart'),
+        '%title'    => $node->title,
+      ));
+    }
+    else {
+      // We can't get just the product here: we have to load the full order
+      // which kinda sucks.
+      $result = db_query("SELECT * FROM {signup_uc_order_products} WHERE sid = %d", $signup->sid);
+      if ($record = db_fetch_array($result)) {
+        $order = uc_order_load($record['order_id']);
+        // Memo to Ubercart folk: key by ID, it can make life much easier.
+        foreach ($order->products as $p) {
+          if ($p->order_product_id == $record['order_product_id']) {
+            // Reassign to prevent the last item in the loop getting picked.
+            $product = $p;
+            break; 
+          }
+        }
+      $message = t('Options which affect the price of the signup may not be altered once it has been purchased.');
+      }
+    }
+    
+    // Add the description array from uc_attribute's hook_product_description().
+    // This gives us formatted output for the user's chosen options.
+    $ubercart_form['attribute_descriptions'] = uc_attribute_product_description($product);
+    
+    // Add an explanation of why these can't be edited.
+    $ubercart_form['notice'] = array(
+      '#value' => '<p>' . $message . '</p>',
+    );
+  }
+  else {
+    // New signup: add the attributes form for this product node.
+    $ubercart_form = _uc_attribute_alter_form($node);
+  }
   
   return $ubercart_form;
 }
