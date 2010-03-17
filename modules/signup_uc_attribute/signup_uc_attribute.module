@@ -170,7 +170,7 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
       }
     }
     else {
-      if ($order_product_id = signup_uc_attribute_get_order_product_id($form['#signup']->sid)) {
+      if ($order_id = signup_uc_attribute_get_order_id($form['#signup']->sid)) {
         if (isset($form['elements']['cancel-signup'])) {
           // @todo: this should only be shown if the current user is the user whose signup this is.
           // ie, check for and eliminate the case where an admin is editing the signup.
@@ -370,7 +370,7 @@ function signup_uc_attribute_cart_item($op, &$item) {
       // order creation.
       // Bit of a WTF, no?
       // @see <http://drupal.org/node/744956> for a patch.
-      if ($order_product_id = signup_uc_attribute_get_order_product_id($item->data['signup_sid'])) {
+      if ($order_id = signup_uc_attribute_get_order_id($item->data['signup_sid'])) {
         return;
       }
 
@@ -429,11 +429,14 @@ function signup_uc_attribute_get_cart_item_id($sid) {
  *  The Signup sid.
  *
  * @return
- *  The UC order_product_id, if it exists.
+ *  The UC order_id, if it exists.
  */
-function signup_uc_attribute_get_order_product_id($sid) {
-  $result = db_query("SELECT order_product_id FROM {signup_uc_order_products} WHERE sid = %d", $sid);
-  if ($order_product_id = db_result($result)) {
-    return $order_product_id;
+function signup_uc_attribute_get_order_id($sid) {
+  $result = db_query("SELECT order_id FROM {signup_uc_order_products} WHERE sid = %d", $sid);
+  if ($order_id = db_result($result)) {
+    return $order_id;
   }
 }
+
+
+
