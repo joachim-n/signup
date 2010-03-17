@@ -357,7 +357,7 @@ function signup_uc_attribute_order($op, &$arg1, $arg2) {
   }
   
   if ($op == 'delete') {
-    // Delete our record.
+    // Delete our order record.
     db_query("DELETE FROM {signup_uc_order_products} WHERE order_id = %d", $arg1->order_id);
   }
 }
@@ -419,7 +419,7 @@ function signup_uc_attribute_cart_item($op, &$item) {
           signup_cancel_signup($signup);
         }
       }
-      // Delete our record.
+      // Delete our cart record.
       db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $item->cart_item_id);
       
       break;
@@ -487,7 +487,7 @@ function signup_uc_attribute_signup_expire($signup, $cart_item_id) {
   uc_cart_update_item($item);
   signup_cancel_signup($signup);
 
-  // Delete our record.
+  // Delete our cart record.
   db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $cart_item_id);
   
   return;
