@@ -22,7 +22,8 @@
  *    - signup_uc_attribute_cart_item, $op = remove
  *  - User checks out: the record from {signup_uc_cart_products} is deleted now 
  *    that the cart is empty; a new record to connect the signup and the order
- *    is created in {signup_uc_order_products}. @todo.
+ *    is created in {signup_uc_order_products}.
+ *    - signup_uc_attribute_order
  *    - signup_uc_attribute_cart_item, $op = remove
  *  - User does not check out within a specified delay: the signup is cancelled,
  *    the quantity in the cart is set to 0, and if the user returns to the cart
@@ -32,6 +33,11 @@
  *    - signup_cancel_signup
  *    - on subsequent visit to cart: signup_uc_attribute_cart_item, $op = load
  *
+ * Data storage:
+ *  - We store the relationship between Signup ID (sid) and Ubercart cart item ID
+ *    in {signup_uc_cart_products}; once an order is complete the relationship
+ *    is then between sid and Ubercart order ID in {signup_uc_order_products}.
+ *
  * @todo
  *  - disallow UI cancellation of a UC signup
  *  - disallow changing of UC attributes of an existing signup from the signup form
@@ -39,7 +45,6 @@
  *  - deal with signups put into the cart but never bought: cancel them on cron?
  *    consider making this feature as a standalone module so non-paid signups
  *    can use it too somehow. (ie signups that need confirmation?)
- *  - data storage to link signup SID with the UC order
  */
 
 /**
@@ -268,15 +273,97 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
  * signup_webform_signup_data_alter() because at that point there is no signup id.
  */
 function signup_uc_attribute_signup_insert($signup) {
-  // We want to store a relationship between:
-  // - cart ID
+  // Retrieve the cart item ID from the signup data.
+  $cart_item_id = $signup->temporary_data['uc_attribute_latest_cart_item_id'];
+  
+  // Retrieve the cart item.
+  $item = uc_cart_get_item($cart_item_id);
+  
+  // Add the Signup ID to the UC cart item so hook_order() has SOME CLUE of
+  // who we are and what we're doing.
+  // This is messy as both IDs (signup and cart item) are now kicking about
+  // in the serialized data of the opposite item: but either way someone's
+  // losing a trailer.
+  // @see <http://drupal.org/node/744954>.
+  $item->data['signup_sid'] = $signup->sid;
+  
+  // Update the cart item.
+  uc_cart_update_item($item);
+  
+  // Store our own data: we store a relationship between:
   // - signup ID
-  // other data such as uid and nid is accessible from both of these.
+  // - cart ID
+  // Other data such as uid and nid is accessible from both of these.
   db_query("INSERT INTO {signup_uc_cart_products} (sid, cart_item_id) VALUES (%d, %d)", 
-    $signup->sid, $signup->temporary_data['uc_attribute_latest_cart_item_id']);
+    $signup->sid, $cart_item_id);  
 }
 
 // -------------------------------- Miscellaneous glue.
+
+/**
+ * Implementation of hook_order().
+ */
+function signup_uc_attribute_order($op, &$arg1, $arg2) {
+  if ($op == 'submit') {
+    // The order is being submitted. 
+    // The cart has not yet been emptied (PHEW! Otherwise I see no way to find out
+    // information about our items).
+    
+    //       db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $item->cart_item_id);
+    dsm($op);
+    dsm($arg1);
+    
+    $order_products = $arg1->products;
+    foreach ($order_products as $product) {
+      if (isset($product->data['signup_sid'])) {
+        // We have a signup product.
+        $signup_sid = $product->data['signup_sid'];
+        
+        dsm("have sid $signup_sid");
+        
+        // Store our own data: we store a relationship between:
+        // - signup ID
+        // - order ID
+        // - order product ID
+        db_query("INSERT INTO {signup_uc_order_products} (sid, order_id, order_product_id) VALUES (%d, %d, %d)", 
+          $signup_sid, $arg1->order_id, $product->order_product_id);
+
+        // We don't need to clear our entry in {signup_uc_cart_products} as 
+        // hook_cart_item() op 'remove' will get called.
+        // @see <http://drupal.org/node/744956> which has a patch to change this.
+        
+        // Get the cart item ID
+        $result = db_query("SELECT cart_item_id FROM {signup_uc_cart_products} WHERE sid = %d", $signup_sid);
+        if ($cart_item_id = db_result($result)) {
+          dsm("cart_item_id: $cart_item_id");
+          
+        }
+        
+        $cart_item = uc_cart_get_item($cart_item_id);
+        $item->data['signup_status'] = 'checkout';
+        
+        // Update the cart item.
+        uc_cart_update_item($item);
+        
+      }
+    }
+    
+    /*
+    // Get the cart contents.
+    $cart_id = uc_cart_get_id();
+      
+    $cart_contents = uc_cart_get_contents($cart_id);
+    dsm($cart_contents);
+    */
+    
+  }
+  
+  if ($op == 'delete') {
+    // Delete our record.
+    db_query("DELETE FROM {signup_uc_order_products} WHERE order_id = %d", $arg1->order_id);
+  }
+}
+
 
 /**
  * Implementation of hook_cart_item().
@@ -303,14 +390,32 @@ function signup_uc_attribute_cart_item($op, &$item) {
       // Act when a signup item is removed from the cart:
       // - cancel the signup
       // - remove our record
-      // Remove is called both when the user manually chooses not to buy a product
-      // AND when the cart is emptied for the order creation.
-      // Bit of a WTF, no?
       
+      // WTF? We seem to come here with our data still serialized.
+      // Might be a bug in this module BUT NO TIME!!!!!!!!!!!!!!!!!!
+      if (!is_array($item->data)) {
+        $item->data = unserialize($item->data); 
+      }
+      
+      // This is a WTF. We have to query {signup_uc_order_products} just to 
+      // determine whether the product is being removed from the cart by the 
+      // user (in which case we cancel the signup) or the cart is going through
+      // checkout (in which case we do not!).
+      // This is because the 'remove' op is called both when the user manually 
+      // chooses not to buy a product AND when the cart is emptied for the 
+      // order creation.
+      // Bit of a WTF, no?
+      // @see <http://drupal.org/node/744956> for a patch.
+      $result = db_query("SELECT order_product_id FROM {signup_uc_order_products} WHERE sid = %d", $item->data['signup_sid']);
+      if ($order_product_id = db_result($result)) {
+        return;
+      }
+
+      // If we are still here, we cancel the signup.
       // Load the product node (it is likely to be cached, eg if we are on the cart page).
       $node = node_load($item->nid);
       if ($node->signup) {
-        // Retrieve the signup and cancel it.
+        // Retrieve the signup.
         $query = db_query("SELECT sl.* FROM {signup_log} sl LEFT JOIN {signup_uc_cart_products} sucp ON sl.sid = sucp.sid WHERE sucp.cart_item_id = %d", $item->cart_item_id);
         while ($signup = db_fetch_object($query)) {
           signup_cancel_signup($signup);
@@ -412,3 +517,12 @@ function _signup_uc_attribute_pane_ids($signup_data) {
   }
   return $return;
 }
+
+/**
+ * Implementation of hook_uc_checkout_complete().
+ */
+function signup_uc_attribute_uc_checkout_complete($order, $account) {
+  dsm($order);
+  dsm($account);
+}
+
