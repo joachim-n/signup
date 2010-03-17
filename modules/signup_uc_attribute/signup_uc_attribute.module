@@ -190,6 +190,16 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
         $form['elements']['cancel-signup']['#value'] = t('This is a paid signup. You may cancel this by removing the item from your cart.');
       }
     }
+    else {
+      $result = db_query("SELECT order_product_id FROM {signup_uc_order_products} WHERE sid = %d", $form['#signup']->sid);
+      if ($order_product_id = db_result($result)) {
+        if (isset($form['elements']['cancel-signup'])) {
+          // @todo: this should only be shown if the current user is the user whose signup this is.
+          // ie, check for and eliminate the case where an admin is editing the signup.
+          $form['elements']['cancel-signup']['#value'] = t('You have already paid for this signup. If you wish to cancel it, you should contact the site administrator.');
+        }
+      }
+    }
   }
 }
 
