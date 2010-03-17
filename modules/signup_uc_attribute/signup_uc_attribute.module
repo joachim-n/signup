@@ -163,8 +163,13 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
   else {
     // New signup: add the attributes form for this product node.
     $ubercart_form = _uc_attribute_alter_form($node);
+    
+    // If a product has no attributes, we get NULL back.
+    if (!isset($ubercart_form)) {
+      $ubercart_form = array();
+    }
   }
-  
+
   return $ubercart_form;
 }
 
@@ -231,6 +236,8 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
 function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
   // Only act on a new signup (we can't alter any ubercart attributes once a 
   // product is in the cart), and if our pane is enabled on the signup node.
+  
+  // @todo: we do nothing here for products with no attributes.
   
   // WTF. Tecnically we don't need this but I was going to put it in just as a safeguard
   // (though can a node ever STOP being a product?) and the cursed thing FAILS. WHY? WTF?
