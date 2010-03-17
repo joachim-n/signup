@@ -162,8 +162,7 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
   $node = node_load($form['#signup']->nid);
   // Only act on signup-enabled nodes that have our pane enabled.
   if (isset($node->signup_form_panes['uc_attribute'])) {
-    $result = db_query("SELECT cart_item_id FROM {signup_uc_cart_products} WHERE sid = %d", $form['#signup']->sid);
-    if ($cart_item_id = db_result($result)) {
+    if ($cart_item_id = signup_uc_attribute_get_cart_item_id($form['#signup']->sid)) {
       if (isset($form['elements']['cancel-signup'])) {
         // @todo: this should only be shown if the current user is the user whose signup this is.
         // ie, check for and eliminate the case where an admin is editing the signup.
@@ -406,6 +405,22 @@ function Xsignup_uc_attribute_signup_cancel($signup, $node) {
 }
 
 // -------------------------------- Utility.
+
+/**
+ * Helper function check if a signup is in the user's cart.
+ *
+ * @param $sid
+ *  The Signup sid.
+ *
+ * @return
+ *  The UC cart_item_id, if it exists.
+ */
+function signup_uc_attribute_get_cart_item_id($sid) {
+  $result = db_query("SELECT cart_item_id FROM {signup_uc_cart_products} WHERE sid = %d", $sid);
+  if ($cart_item_id = db_result($result)) {
+    return $cart_item_id;
+  }
+}
 
 /**
  * Helper function check if a signup is fully paid for.
