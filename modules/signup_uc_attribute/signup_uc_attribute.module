@@ -160,6 +160,10 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     $ubercart_form['notice'] = array(
       '#value' => '<p>' . $message . '</p>',
     );
+    
+    // We have to have SOME sort of form value so the submit handler gets an array
+    // for our pane in $form_state. Hence just a dummy value here.
+    $ubercart_form['aargh'] = array('#type' => 'value', '#value' => VERSION);
   }
   else {
     // New signup: add the attributes form for this product node.
@@ -230,12 +234,13 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
  * to the cart.
  */
 function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
-  // Only act if our pane is enabled on the signup node.
+  // Only act on a new signup (we can't alter any ubercart attributes once a 
+  // product is in the cart), and if our pane is enabled on the signup node.
   
   // WTF. Tecnically we don't need this but I was going to put it in just as a safeguard
   // (though can a node ever STOP being a product?) and the cursed thing FAILS. WHY? WTF?
   // dsm('product ((' . $signup->nid . ')) ' . uc_product_is_product($signup->nid));
-  if (isset($signup->form_data['uc_attribute'])) {
+  if (!isset($signup->sid) && isset($signup->form_data['uc_attribute'])) {
 
     dsm($signup);
     dsm($form_values);
