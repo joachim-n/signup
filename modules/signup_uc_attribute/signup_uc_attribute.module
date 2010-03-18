@@ -36,6 +36,9 @@
  *
  * @todo
  *  - disallow UI cancellation of a UC signup
+ *
+ * see also
+ * - http://drupal.org/node/631230 - if we want to restrict cancellation via Ubercart.
  */
 
 /**
