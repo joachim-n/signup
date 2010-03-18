@@ -341,6 +341,29 @@ function signup_uc_attribute_signup_insert($signup) {
 // -------------------------------- Miscellaneous glue.
 
 /**
+ * Implementation of hook_form_FORM_ID_alter(): uc_cart_view_form.
+ *
+ * Prevent more than one signup product being added to the cart.
+ */
+function signup_uc_attribute_form_uc_cart_view_form_alter(&$form, &$form_state) {
+  // Disable Qty. fields on the cart view form for signup products.
+  foreach (element_children($form['items']) as $key) {
+    if (!isset($form['items'][$key]['nid'])) {
+      // The last numerically keyed item is the total row, and not a product.
+      continue;
+    }
+
+    $data = unserialize($form['items'][$key]['data']['#value']);
+    // Act on products that correspond to a signup: change the form item to a 
+    // fixed value and supply our own theme function.
+    if ($data['signup_sid']) {
+      $form['items'][$key]['qty']['#type'] = 'value';
+      $form['items'][$key]['qty']['#theme'] = 'signup_uc_attribute_locked_qty_field';
+    }
+  }
+}
+
+/**
  * Implementation of hook_order().
  */
 function signup_uc_attribute_order($op, &$arg1, $arg2) {
@@ -490,5 +513,25 @@ function signup_uc_attribute_get_order_id($sid) {
   }
 }
 
+// -------------------------------- Theming.
 
+/**
+ * Implementation of hook_theme().
+ */
+function signup_uc_attribute_theme($existing, $type, $theme, $path) {
+  return array(
+    'signup_uc_attribute_locked_qty_field' => array(
+      'arguments' => array('arg1' => NULL, 'arg2' => 0, 'arg3' => FALSE),
+    ),
+  );
+}
+
+/**
+ * Themes cart Qty. boxes so they can't be changed.
+ *
+ * Ripped from uc_restrict_qty.module as we want neither the dependency nor the UI.
+ */
+function theme_signup_uc_attribute_locked_qty_field($element) {
+  return check_plain($element['#value']);
+}
 
