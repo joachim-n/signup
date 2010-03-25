@@ -389,17 +389,14 @@ function signup_uc_attribute_order($op, &$arg1, $arg2) {
     // The cart has not yet been emptied (PHEW! Otherwise I see no way to find out
     // information about our items).
     
-    //       db_query("DELETE FROM {signup_uc_cart_products} WHERE cart_item_id = %d", $item->cart_item_id);
-    dsm($op);
-    dsm($arg1);
+    //dsm($op);
+    //dsm($arg1);
     
     $order_products = $arg1->products;
     foreach ($order_products as $product) {
       if (isset($product->data['signup_sid'])) {
         // We have a signup product.
         $signup_sid = $product->data['signup_sid'];
-        
-        dsm("have sid $signup_sid");
         
         // Store our own data: we store a relationship between:
         // - signup ID
@@ -415,15 +412,6 @@ function signup_uc_attribute_order($op, &$arg1, $arg2) {
         db_query("DELETE FROM {signup_uc_cart_products} WHERE sid = %d", $signup_sid);
       }
     }
-    
-    /*
-    // Get the cart contents.
-    $cart_id = uc_cart_get_id();
-      
-    $cart_contents = uc_cart_get_contents($cart_id);
-    dsm($cart_contents);
-    */
-    
   }
   
   if ($op == 'delete') {
