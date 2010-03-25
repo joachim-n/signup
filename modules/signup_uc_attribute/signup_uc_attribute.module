@@ -223,6 +223,22 @@ function signup_uc_attribute_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+
+/**
+ * Implementation of hook_form_FORM_ID_alter(): signup form.
+ *
+ * Change the text of the Signup button.
+ */
+function signup_uc_attribute_form_signup_form_alter(&$form, $form_state) {
+  $node = node_load($form['nid']['#value']);
+  // Only act on signup-enabled nodes that have our pane enabled.
+  if (isset($node->signup_form_panes['uc_attribute'])) {
+    // Some wackier parts of FormAPI depend on the text value of this button.
+    // One to check if ever chasing a bug.
+    $form['collapse']['submit']['#value'] = t('Sign up and add to cart');
+  }
+}
+
 /**
  * Implementation of hook_form_FORM_ID_alter(): signup edit form.
  *
