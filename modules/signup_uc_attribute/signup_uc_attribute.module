@@ -125,7 +125,6 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     
     // Some flags to indicate the user's level of access.
     $may_edit   = user_access('edit own signups');
-    $may_cancel = user_access('cancel own signups') || user_access('cancel signups');
 
     // Retrieve the product tied to this existing signup: it is either a cart
     // item or an order product and we have no way of knowing which until we
