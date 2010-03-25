@@ -379,6 +379,9 @@ function signup_uc_attribute_form_uc_cart_view_form_alter(&$form, &$form_state) 
 
 /**
  * Implementation of hook_order().
+ *
+ * - act on submission of an order.
+ * - clean up data when an order is deleted.
  */
 function signup_uc_attribute_order($op, &$arg1, $arg2) {
   if ($op == 'submit') {
