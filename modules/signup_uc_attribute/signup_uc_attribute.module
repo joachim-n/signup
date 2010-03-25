@@ -123,14 +123,23 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     // We show the user the options they chose and an explanation of why they
     // can't be edited.
     
-    // Retrieve the product tied to this existing signup: either a cart item or an order product.
+    // Some flags to indicate the user's level of access.
+    $may_edit   = user_access('edit own signups');
+    $may_cancel = user_access('cancel own signups') || user_access('cancel signups');
+
+    // Retrieve the product tied to this existing signup: it is either a cart
+    // item or an order product and we have no way of knowing which until we
+    // query the database.
     if ($cart_item_id = signup_uc_attribute_get_cart_item_id($signup->sid)) {
       $product = uc_cart_get_item($cart_item_id);
-      
-      $message = t('Options which affect the price of the signup may not be altered once it has been added to the cart. To change these options, remove %title from your <a href="!cart-url">cart</a> and sign up again.', array(
-        '!cart-url' => url('cart'),
-        '%title'    => $node->title,
-      ));
+
+      // Explain to the user why they can edit the signup but not our options.
+      if ($may_edit) {
+        $message = t('Options which affect the price of the signup may not be altered once it has been added to the cart. To change these options, remove %title from your <a href="!cart-url">cart</a> and sign up again.', array(
+          '!cart-url' => url('cart'),
+          '%title'    => $node->title,
+        ));
+      }
     }
     else {
       // We can't get just the product here: we have to load the full order
@@ -146,18 +155,24 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
             break; 
           }
         }
-      $message = t('Options which affect the price of the signup may not be altered once it has been purchased.');
+      }
+
+      // Explain to the user why they can edit the signup but not our options.
+      if ($may_edit) {
+        $message = t('Options which affect the price of the signup may not be altered once it has been purchased.');
       }
     }
-    
+
     // Add the description array from uc_attribute's hook_product_description().
     // This gives us formatted output for the user's chosen options.
     $ubercart_form['attribute_descriptions'] = uc_attribute_product_description($product);
     
-    // Add an explanation of why these can't be edited.
-    $ubercart_form['notice'] = array(
-      '#value' => '<p>' . $message . '</p>',
-    );
+    // Add our explanation if there is one.
+    if (isset($message)) {
+      $ubercart_form['notice'] = array(
+        '#value' => '<p>' . $message . '</p>',
+      );
+    }
     
     // We have to have SOME sort of form value so the submit handler gets an array
     // for our pane in $form_state. Hence just a dummy value here.
