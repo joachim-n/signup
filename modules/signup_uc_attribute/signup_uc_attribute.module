@@ -11,6 +11,12 @@
  * have to alter the product already in the cart and it seems messy. But
  * suggestions welcome!
  *
+ * == Setup notes ==
+ * You probably want:
+ * - only logged-in users may sign up
+ * - don't send signup confirmation mails (conflicting message with Ubercart mails maybe? needs more investigation)
+ *
+ * == Code nodes ==
  * The flows are as follows:
  *  - User signs up for an event: the signup node product is added to their cart
  *    and a record is added to {signup_uc_cart_products} to connect the signup and the cart item.
