@@ -172,8 +172,10 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
     // This gives us formatted output for the user's chosen options.
     $ubercart_form['attribute_descriptions'] = uc_attribute_product_description($product);
     
-    // Add our explanation if there is one.
-    if (isset($message)) {
+    // Add our explanation if there is one, and if there are actually options
+    // the user might consider editable -- ie, skip this if there are no 
+    // attributes.
+    if (isset($message) && count(element_children($ubercart_form['attribute_descriptions']['attributes']))) {
       $ubercart_form['notice'] = array(
         '#value' => '<p>' . $message . '</p>',
       );
