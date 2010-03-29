@@ -130,7 +130,9 @@ function signup_profile_form(&$signup_form, &$form_state, $node, $signup, $pane_
     foreach (element_children($form[$category]) as $key) {
       $form[$category][$key]['#default_value'] = $account->$key;
     }
-    $form[$category]['#description'] = t('This information is from your site profile; changes you make here will be saved into it.');
+    $form[$category]['#description'] = t('This information is from your @site-name user profile; changes you make here will be saved into it.', array(
+      '@site-name' => variable_get('site_name', 'Drupal'),
+    ));
   }
     
   return $form;
