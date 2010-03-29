@@ -180,10 +180,6 @@ function signup_uc_attribute_form(&$signup_form, &$form_state, $node, $signup, $
         '#value' => '<p>' . $message . '</p>',
       );
     }
-    
-    // We have to have SOME sort of form value so the submit handler gets an array
-    // for our pane in $form_state. Hence just a dummy value here.
-    $ubercart_form['signup_uc_attribute_dummy'] = array('#type' => 'value', '#value' => VERSION);
   }
   else {
     // New signup: add the attributes form for this product node.
