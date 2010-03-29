@@ -247,15 +247,25 @@ function signup_uc_attribute_form_signup_edit_form_alter(&$form, $form_state) {
       if (isset($form['elements']['cancel-signup'])) {
         // @todo: this should only be shown if the current user is the user whose signup this is.
         // ie, check for and eliminate the case where an admin is editing the signup.
-        $form['elements']['cancel-signup']['#value'] = t('This is a paid signup. You may cancel this by removing the item from your cart.');
+        // It is necessary to have this markup in a block element, otherwise 
+        // internal span elements get taken out by some sort of FormAPI theming.
+        $form['elements']['cancel-signup']['#value'] = '<p>' . t('This is a paid %node_type. You may cancel this by removing the item from your <a href="!cart-url">cart</a>.', array(
+          '%node_type' => node_get_types('name', $node->type),
+          '!cart-url' => url('cart'),
+        )) . '</p>';
       }
+
     }
     else {
       if ($order_id = signup_uc_attribute_get_order_id($form['#signup']->sid)) {
         if (isset($form['elements']['cancel-signup'])) {
           // @todo: this should only be shown if the current user is the user whose signup this is.
           // ie, check for and eliminate the case where an admin is editing the signup.
-          $form['elements']['cancel-signup']['#value'] = t('You have already paid for this signup. If you wish to cancel it, you should contact the site administrator.');
+          // It is necessary to have this markup in a block element, otherwise 
+          // internal span elements get taken out by some sort of FormAPI theming.
+          $form['elements']['cancel-signup']['#value'] = '<p>' . t('You have already paid for this %node_type. If you wish to cancel it, you should contact the site administrator.', array(
+            '%node_type' => node_get_types('name', $node->type),
+          )) . '</p>';
         }
       }
     }
