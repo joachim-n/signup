@@ -78,7 +78,7 @@ function signup_uc_attribute_help($path, $arg) {
  */
 function signup_uc_attribute_signup_pane_info($node = NULL) {
   // Only return a pane if the current node is an Ubercart product.
-  if (uc_product_is_product($node)) {
+  if (!isset($node->nid) || uc_product_is_product($node)) {
     return array(
       'uc_attribute' => array(
         'label' => t('Product attributes'),
