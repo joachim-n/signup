@@ -82,7 +82,7 @@ function signup_uc_attribute_signup_pane_info($node = NULL) {
     return array(
       'uc_attribute' => array(
         'label' => t('Product attributes'),
-        'description' => t("Shows Ubercart attributes for the signup-enable product node, and disables the regular Ubercart 'add to cart' form."),
+        'description' => t("Shows Ubercart attributes for the signup-enabled product node, adds the product to the cart when the user signs up, and disables the regular Ubercart 'add to cart' form."),
         'callback' => 'signup_uc_attribute_form',
       ),
     );
