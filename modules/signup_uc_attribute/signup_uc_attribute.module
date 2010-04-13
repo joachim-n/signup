@@ -316,8 +316,9 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
       //TRUE  // $check_redirect??? @todo figure out if this is useful to us.
     );
     
-    drupal_set_message(t('The product %title has been added to your cart. Your signup is temporary until you have completed checkout.', array(
+    drupal_set_message(t('The product %title has been added to your <a href="!cart-url">cart</a>. Your signup is temporary until you have completed checkout.', array(
       '%title' => $node->title,
+      '!cart-url' => url('cart'),
     )));
 
     // Total WTF: uc_cart_add_item() returns no data WHATSOEVER about what we 
