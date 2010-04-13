@@ -303,7 +303,7 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
       'attributes'  => $uc_attribute_data,
       'model'       => FALSE, // no idea why!
       'shippable'   => $node->shippable,
-      'signup_in_progress' => TRUE,
+      'signup_in_progress' => TRUE, // This is checked by our hook_add_to_cart().
     );
     
     // Add the item to the cart.
@@ -340,6 +340,35 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
     // In order to set a connection to our own data, we put in our own data's ID 
     // here, so we can retrieve it in hook_signup_insert().
     $signup->temporary_data['uc_attribute_latest_cart_item_id'] = $latest_cart_item_id;
+  }
+}
+
+/**
+ * Implementation of hook_add_to_cart().
+ *
+ * Prevent a signup node being added to the cart by means other than our own, 
+ * eg an 'Add to cart' button in a View.
+ * (Note: the alternative would be to provide our own validation parallel
+ * to uc_catalog_buy_it_now_form_validate(). @todo, perhaps.)
+ *
+ * This hook is invoked by uc_cart_add_item() that we called in signup_uc_attribute_signup_data_alter() above.
+ */
+function signup_uc_attribute_add_to_cart($nid, $qty, $data) {
+  $node = node_load($nid);
+  // Only act on signup-enabled nodes that have our pane enabled.
+  if (isset($node->signup_form_panes['uc_attribute'])) {
+    // For a signup-enabled node with our pane to be added to the cart, it must
+    // come from the signup form submission. If our $data key is not set, reject it.
+    if (!$data['signup_in_progress']) {
+      $result[] = array(
+        'success' => FALSE,
+        'message' => t('To purchase this %node_type you must <a href="!node-url">enter your signup details</a>.', array(
+          '%node_type' => node_get_types('name', $node->type),
+          '!node-url' => url('node/' . $node->nid),
+        )),
+      );
+      return $result;
+    }
   }
 }
 
