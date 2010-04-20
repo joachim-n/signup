@@ -1270,6 +1270,11 @@ function signup_sign_up_user($signup_form, $notify_user = TRUE) {
     // Invoke hook_signup_data_alter() to let other modules change this.
     drupal_alter('signup_data', $signup, $signup_form);
 
+    // Altering modules may set $signup->block_signup = TRUE to prevent signup.
+    if ($signup->block_signup == TRUE) {
+      return FALSE;
+    }
+
     // Insert the signup into the {signup_log} table.
     signup_save_signup($signup);
 

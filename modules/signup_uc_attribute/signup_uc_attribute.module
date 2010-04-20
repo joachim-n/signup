@@ -316,11 +316,6 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
       //TRUE  // $check_redirect??? @todo figure out if this is useful to us.
     );
     
-    drupal_set_message(t('The product %title has been added to your <a href="!cart-url">cart</a>. Your signup is temporary until you have completed checkout.', array(
-      '%title' => $node->title,
-      '!cart-url' => url('cart'),
-    )));
-
     // Total WTF: uc_cart_add_item() returns no data WHATSOEVER about what we 
     // have just done: no cart ID, no item ID, nada.
     // So we have to take a wild stab at it and HOPE LIKE HELL that a site admin
@@ -331,15 +326,42 @@ function signup_uc_attribute_signup_data_alter(&$signup, $form_values) {
     $cart_contents = uc_cart_get_contents($cart_id, 'rebuild');
     //dsm($cart_contents);
     
+    // Find the cart item(s) that is the current node.
     foreach ($cart_contents as $index => $cart_item) {
-      $cart_item_ids[] = $cart_item->cart_item_id;
+      if ($cart_item->nid == $node->nid) {
+        // Key the items by cart item ID for easy access to this value.
+        $signup_cart_items[$cart_item->cart_item_id] = $cart_item;
+      }
     }
-    $latest_cart_item_id = max($cart_item_ids);
+
+    // Check how many products we've found and act accordingly.
+    if (count($signup_cart_items) == 0) {
+      // If there is no product for our node in the cart, then the adding to
+      // the cart has been prevented, possibly by hook_add_to_cart().
+      // Prevent the signup from going ahead.
+      $signup->block_signup = TRUE;
+      return;
+    }
+    elseif (count($signup_cart_items) > 1) {
+      // If there is more than one of this node in the cart, something wacky is going on.
+      // We have two of the same product!
+      // Ours is the most recent, we assume.
+      $cart_item_id = max(array_keys($signup_cart_items));
+    }
+    else {
+      // Only one product of this node in the cart. Everything okay.
+      $cart_item_id = reset(array_keys($signup_cart_items));
+    }
+
+    drupal_set_message(t('The product %title has been added to your <a href="!cart-url">cart</a>. Your signup is temporary until you have completed checkout.', array(
+      '%title' => $node->title,
+      '!cart-url' => url('cart'),
+    )));
     
     // We have no signup sid here. 
     // In order to set a connection to our own data, we put in our own data's ID 
     // here, so we can retrieve it in hook_signup_insert().
-    $signup->temporary_data['uc_attribute_latest_cart_item_id'] = $latest_cart_item_id;
+    $signup->temporary_data['uc_attribute_latest_cart_item_id'] = $cart_item_id;
   }
 }
 

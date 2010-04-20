@@ -61,7 +61,11 @@ function hook_signup_pane_info($node = NULL) {
  *
  * @param $signup
  *   Reference to the fully-loaded signup object representing the signup.
- * @param $form_values
+ *   Modules implementing this hook may prevent a signup from going ahead by
+ *   setting $signup->block_signup = TRUE.
+ *   It is up to the implementing module to provide a message to the user to
+ *   explain why their attempt to sign up has failed.
+* @param $form_values
  *   Array of form values (if any) from the signup being inserted or updated.
  */
 function hook_signup_data_alter(&$signup, $form_values) {
