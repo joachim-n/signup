@@ -1,6 +1,6 @@
 ; $Id$
 name = Signup Ubercart attributes
-description = Adds a signup pane for Ubercart product attributes
+description = Provides a signup form pane containing Ubercart product attributes and allows purchase of a signup.
 core = 6.x
 package = Signup
 dependencies[] = signup
