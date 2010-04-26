@@ -85,6 +85,20 @@ function signup_pane_example_form(&$signup_form, &$form_state, $node, $signup, $
 }
 
 /**
+ * Form validation function for our signup pane.
+ *
+ * This function should be of the form PANECALLBACK_validate.
+ */
+function signup_pane_example_form_validate($element, &$form_state) {
+  /*
+  // Example validation code:
+  if ($form_state['values']['signup_form_data']['example']['favorite_color'] != 'blue') {
+    form_set_error('signup_form_data][example][favorite_color', t('Favourite colour must be blue.'));
+  }
+  */
+}
+
+/**
  * Implementation of hook_signup_data_alter().
  *
  * If we want to handle our own data storage rather than let signup module do it,

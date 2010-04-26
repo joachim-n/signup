@@ -90,6 +90,8 @@ function signup_form(&$form_state, $node, $signup_type = 'auth', $fieldset = TRU
         $signup_form['signup_form_data'][$pane_id] = array(
           '#tree' => TRUE,
         );
+        // Add a validation function for each pane.
+        $signup_form['signup_form_data']['#element_validate'][] = $callback . '_validate';
         $signup_form['signup_form_data'][$pane_id] += $callback($signup_form, $form_state, $node, NULL, $pane_id, $signup_type);
       }
     }

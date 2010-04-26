@@ -98,6 +98,8 @@ function signup_edit_form($form_state, $signup, $type) {
         $form['elements']['signup_form_data'][$pane_id] = array(
           '#tree' => TRUE,
         );
+        // Add a validation function for each pane.
+        $form['elements']['signup_form_data']['#element_validate'][] = $callback . '_validate';
         $form['elements']['signup_form_data'][$pane_id] += $callback($form, $form_state, $node, $signup, $pane_id, $signup_type);
       }
     }
