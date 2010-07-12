@@ -36,7 +36,7 @@ function signup_webform_schema() {
         'default' => 0,
       ),
     ),
-    'primary key' => array('signup_sid'),
+    'primary key' => array('signup_sid', 'webform_nid'),
   );
   
   return $schema;
